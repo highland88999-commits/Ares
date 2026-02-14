@@ -2,222 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES | Global Command</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>ARES | Global Security Terminal</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --ares-red: #ff0000;
+            --ares-amber: #ffaa00;
+            --glass: rgba(15, 0, 0, 0.4);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
+
+        /* --- STAGE 1: SIGNAL GATE (Entry logic) --- */
+        #entry-gate {
+            position: fixed; inset: 0; z-index: 9999; background: #000;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+        }
+        .gate-btn {
+            padding: 25px 50px; border: 2px solid var(--ares-red); border-radius: 4px;
+            color: var(--ares-red); letter-spacing: 15px; font-size: 1.2rem;
+            text-shadow: 0 0 15px var(--ares-red); box-shadow: 0 0 30px rgba(255,0,0,0.2);
+            animation: breathe 3s infinite;
+        }
+
+        /* --- STAGE 2: MAIN TERMINAL --- */
+        #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
         
-        body {
-            background: #000;
-            color: #ff0000;
-            font-family: 'Courier New', Courier, monospace;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Video logic: Hidden initially, then fills background */
+        /* Background Video Logic */
         #bg-video {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -2;
-            background: #000;
-            filter: brightness(0.4);
-            opacity: 0;
-            transition: opacity 1s ease;
+            position: absolute; inset: 0; width: 100%; height: 100%; 
+            object-fit: cover; z-index: 5; filter: brightness(0.4);
         }
 
-        .holoframe {
-            background: rgba(255, 0, 0, 0.05);
-            backdrop-filter: blur(15px) saturate(150%);
-            -webkit-backdrop-filter: blur(15px) saturate(150%);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
-        /* 1mm Floating Rule Logic */
-        #main-content {
-            display: none;
-            padding: 30px;
-            height: calc(100vh - 104px); 
-            overflow-y: auto;
-            position: relative;
-            z-index: 10;
-        }
-
+        /* Hive Counter (Top Right) */
         #hive-population {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            z-index: 2001;
-            text-align: right;
-            border-left: 3px solid #ff0000;
+            position: fixed; top: 20px; right: 20px; padding: 12px 25px; z-index: 2001; 
+            text-align: right; border-left: 4px solid var(--ares-red);
+            background: var(--glass); backdrop-filter: blur(10px); border-radius: 4px;
         }
 
-        /* Landing System */
-        #landing {
-            position: fixed;
-            inset: 0;
-            z-index: 3000;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* --- HOLOFRAMES (1mm Floating Rule Logic) --- */
+        #terminal-shell {
+            position: relative; z-index: 100; padding: 30px;
+            /* Enforcement of 1mm gap (4px) above the 90px dock */
+            height: calc(100vh - 94px); 
+            overflow-y: auto;
         }
 
-        #enter-btn {
-            background: transparent;
-            color: #ff0000;
-            font-size: 2.5em;
-            padding: 30px 70px;
-            border: 2px solid #ff0000;
-            cursor: pointer;
-            letter-spacing: 15px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
-            transition: 0.3s;
+        .holo-window {
+            background: var(--glass); border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.1);
+            border-radius: 4px; backdrop-filter: blur(20px);
+            padding: 30px; margin-bottom: 20px; width: 100%; max-width: 800px;
         }
 
-        #enter-btn:hover {
-            background: #ff0000;
-            color: #000;
-            box-shadow: 0 0 60px #ff0000;
+        .holo-header {
+            color: var(--ares-red); text-shadow: 0 0 10px var(--ares-red);
+            letter-spacing: 5px; font-size: 1.1rem; margin-bottom: 15px;
         }
 
-        #loading {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 2999;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        /* --- NAVIGATION DOCK --- */
+        #hud-dock {
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 30px; z-index: 1000;
+            background: rgba(0,0,0,0.8); padding: 10px 40px; border-radius: 50px;
+            border: 1px solid var(--ares-red); backdrop-filter: blur(12px);
         }
-
-        .progress-bar { width: 40%; height: 2px; background: #300; margin-top: 20px; }
-        .progress { width: 0; height: 100%; background: #ff0000; transition: width 3s linear; }
-
-        #bottom-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2000;
-            display: flex;
-            gap: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 12px 30px;
-            border-radius: 50px;
-            border: 1px solid #ff0000;
-            backdrop-filter: blur(10px);
+        .icon {
+            width: 55px; height: 55px; border: 1px solid var(--ares-red);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1.4rem; color: var(--ares-red); transition: 0.4s;
         }
+        .icon.active { background: var(--ares-red); color: #000; box-shadow: 0 0 20px var(--ares-red); }
 
-        .icon-btn {
-            width: 50px; height: 50px;
-            border: 1px solid #ff0000;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: #ff0000; font-size: 1.3em;
-        }
+        @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <video id="bg-video" loop playsinline>
+<div id="entry-gate" onclick="initAres()">
+    <div class="gate-btn">INITIATE ARES</div>
+</div>
+
+<div id="main-terminal">
+    <video id="bg-video" loop playsinline muted>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
 
-    <div id="music-container" style="position: absolute; width: 0; height: 0; overflow: hidden;"></div>
+    <div id="audio-engine"></div>
 
-    <div id="hive-population" class="holoframe">
-        <div style="font-size: 0.6em; letter-spacing: 2px;">ACTIVE NODES</div>
-        <div id="node-count" style="font-size: 1.3em; font-weight: bold;">1,204,812</div>
+    <div id="hive-population">
+        <div style="font-size: 0.6em; letter-spacing: 2px; color: #888;">ACTIVE HIVE NODES</div>
+        <div id="node-count" style="font-size: 1.3em; font-weight: bold; color: var(--ares-red);">1,204,812</div>
     </div>
 
-    <div id="landing">
-        <button id="enter-btn">ENTER ARES</button>
-    </div>
-
-    <div id="loading">
-        <div style="letter-spacing: 8px;">UPLINKING TO HIVE</div>
-        <div class="progress-bar"><div class="progress" id="progress"></div></div>
-    </div>
-
-    <div id="main-content">
-        <div class="holoframe" style="padding: 25px; border-left: 5px solid #ff0000;">
-            <h3 style="letter-spacing: 4px; margin-bottom: 10px;">OPERATIONAL MISSION</h3>
-            <p style="font-style: italic; color: rgba(255,255,255,0.7);">"Architecting an impenetrable global hive-mind to intercept and neutralize digital incursions. Transforming vulnerable endpoints into a unified defense grid."</p>
+    <div id="terminal-shell">
+        <div id="win-brief" class="holo-window">
+            <h2 class="holo-header">MISSION BRIEF</h2>
+            <p style="font-style: italic; color: rgba(255,255,255,0.8); line-height: 1.6;">
+                "To architect an impenetrable global hive-mind that anticipates, intercepts, and neutralizes digital incursions before they breach the perimeter."
+            </p>
         </div>
 
-        <div class="holoframe" style="padding: 25px;">
-            <h3 style="margin-bottom: 15px; font-size: 0.9em;">INTEL-LINK SCAM VERIFICATION</h3>
+        <div id="win-scanner" class="holo-window">
+            <h2 class="holo-header">SCAM SCANNER</h2>
             <div style="display: flex; gap: 10px;">
-                <input type="text" id="link-input" placeholder="PASTE URL..." style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid #ff0000; color: #fff; padding: 12px; font-family: 'Courier New'; outline: none;">
-                <button onclick="checkLink()" style="background: #ff0000; color: #000; border: none; padding: 0 30px; font-weight: bold; cursor: pointer;">SCAN</button>
+                <input type="text" id="link-input" placeholder="PASTE URL..." 
+                       style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--ares-red); color: #fff; padding: 12px; font-family: 'Courier New'; outline: none;">
+                <button onclick="checkLink()" style="background: var(--ares-red); color: #000; border: none; padding: 0 30px; font-weight: bold; cursor: pointer;">SCAN</button>
             </div>
-            <div id="result-text" style="margin-top: 15px; font-size: 0.8em; color: #888;">[ SYSTEM: STANDBY ]</div>
+            <div id="result-text" style="margin-top: 15px; font-size: 0.8em; color: var(--ares-amber);">[ STATUS: STANDBY ]</div>
         </div>
     </div>
 
-    <div id="bottom-bar">
-        <div class="icon-btn" onclick="location.reload()">🛡️</div>
-        <div class="icon-btn" onclick="alert('Threat Logs: Encrypted')">⚠️</div>
-        <div class="icon-btn" onclick="alert('Files: Initializing...')">📁</div>
+    <div id="hud-dock">
+        <div class="icon active" onclick="toggleView('brief', this)">🛡️</div>
+        <div class="icon" onclick="toggleView('scanner', this)">⚠️</div>
     </div>
+</div>
 
-    <script>
-        const enterBtn = document.getElementById('enter-btn');
-        const video = document.getElementById('bg-video');
-        const music = document.getElementById('music-container');
+<script>
+    function initAres() {
+        // Hide Gate
+        document.getElementById('entry-gate').style.display = 'none';
+        
+        // Show Terminal
+        const terminal = document.getElementById('main-terminal');
+        terminal.style.display = 'block';
 
-        // THE FIX: Single click event to bypass all browser blocks
-        enterBtn.addEventListener('click', () => {
-            // 1. Forced Video Play
-            video.style.opacity = "1";
-            video.play().catch(error => {
-                console.log("Video Autoplay failed, but user clicked. Overriding...");
-            });
+        // Trigger Video
+        const vid = document.getElementById('bg-video');
+        vid.play();
 
-            // 2. Forced Music Injection (Unmuted)
-            music.innerHTML = `
-                <iframe width="1" height="1" 
-                src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
-                frameborder="0" allow="autoplay"></iframe>`;
+        // Trigger Unmuted Audio (Direct user gesture bypass)
+        document.getElementById('audio-engine').innerHTML = `
+            <iframe width="0" height="0" 
+            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
+            frameborder="0" allow="autoplay"></iframe>
+        `;
+    }
 
-            // 3. UI Transition
-            document.getElementById('landing').style.display = 'none';
-            document.getElementById('loading').style.display = 'flex';
-            setTimeout(() => { document.getElementById('progress').style.width = '100%'; }, 100);
-            
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-            }, 3200);
-        });
+    // Hive Counter Logic
+    setInterval(() => {
+        const count = 1204812 + Math.floor(Math.random() * 40 - 20);
+        document.getElementById('node-count').innerText = count.toLocaleString();
+    }, 2000);
 
-        // Hive Logic
-        setInterval(() => {
-            const base = 1204812;
-            const jitter = Math.floor(Math.random() * 50) - 25;
-            document.getElementById('node-count').innerText = (base + jitter).toLocaleString();
-        }, 2000);
+    // UI Toggle
+    function toggleView(id, btn) {
+        const win = document.getElementById('win-' + id);
+        win.style.display = (win.style.display === 'none') ? 'block' : 'none';
+        btn.classList.toggle('active');
+    }
 
-        // Scan Logic
-        function checkLink() {
-            const val = document.getElementById('link-input').value;
-            if(!val) return;
-            document.getElementById('result-text').innerHTML = "[ SCANNING GLOBAL BLACKLISTS... ]";
-            setTimeout(() => {
-                window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(val)}`, '_blank');
-                document.getElementById('result-text').innerHTML = "[ EXTERNAL INTEL REPORT GENERATED ]";
-            }, 1500);
-        }
-    </script>
+    // Scan Logic
+    function checkLink() {
+        const val = document.getElementById('link-input').value;
+        const res = document.getElementById('result-text');
+        if(!val) return;
+        res.innerHTML = "[ ACCESSING GLOBAL BLACKLISTS... ]";
+        setTimeout(() => {
+            window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(val)}`, '_blank');
+            res.innerHTML = "[ SCAN COMPLETE: EXTERNAL REPORT OPENED ]";
+        }, 1500);
+    }
+</script>
 </body>
 </html>
