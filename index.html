@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES | Global Security Hive</title>
+    <title>ARES | Global Command</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -16,7 +16,7 @@
             position: relative;
         }
 
-        /* --- BACKGROUND VIDEO (Muted for Cinematic Backdrop) --- */
+        /* Video logic: Hidden initially, then fills background */
         #bg-video {
             position: fixed;
             inset: 0;
@@ -26,24 +26,25 @@
             z-index: -2;
             background: #000;
             filter: brightness(0.4);
+            opacity: 0;
+            transition: opacity 1s ease;
         }
 
-        /* --- GLASS HOLOFRAMES --- */
         .holoframe {
-            background: rgba(255, 0, 0, 0.04);
-            backdrop-filter: blur(15px) saturate(180%);
-            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            background: rgba(255, 0, 0, 0.05);
+            backdrop-filter: blur(15px) saturate(150%);
+            -webkit-backdrop-filter: blur(15px) saturate(150%);
             border: 1px solid rgba(255, 0, 0, 0.3);
-            box-shadow: 0 0 25px rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
             border-radius: 4px;
             margin-bottom: 20px;
         }
 
-        /* --- 1MM FLOATING RULE (99px offset) --- */
+        /* 1mm Floating Rule Logic */
         #main-content {
             display: none;
             padding: 30px;
-            height: calc(100vh - 99px); 
+            height: calc(100vh - 104px); 
             overflow-y: auto;
             position: relative;
             z-index: 10;
@@ -53,13 +54,13 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 12px 25px;
+            padding: 10px 20px;
             z-index: 2001;
             text-align: right;
-            border-left: 4px solid #ff0000;
+            border-left: 3px solid #ff0000;
         }
 
-        /* --- LANDING SYSTEM --- */
+        /* Landing System */
         #landing {
             position: fixed;
             inset: 0;
@@ -71,15 +72,21 @@
         }
 
         #enter-btn {
-            background: rgba(255, 0, 0, 0.1);
-            color: #fff;
-            font-size: 2.2em;
-            padding: 25px 60px;
+            background: transparent;
+            color: #ff0000;
+            font-size: 2.5em;
+            padding: 30px 70px;
             border: 2px solid #ff0000;
             cursor: pointer;
             letter-spacing: 15px;
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.4);
-            text-transform: uppercase;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+            transition: 0.3s;
+        }
+
+        #enter-btn:hover {
+            background: #ff0000;
+            color: #000;
+            box-shadow: 0 0 60px #ff0000;
         }
 
         #loading {
@@ -93,54 +100,44 @@
             align-items: center;
         }
 
-        .progress-bar { width: 300px; height: 2px; background: #200; margin-top: 20px; }
+        .progress-bar { width: 40%; height: 2px; background: #300; margin-top: 20px; }
         .progress { width: 0; height: 100%; background: #ff0000; transition: width 3s linear; }
 
-        /* --- NAVIGATION DOCK --- */
         #bottom-bar {
             position: fixed;
-            bottom: 15px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 2000;
             display: flex;
-            gap: 25px;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 15px 40px;
-            border-radius: 60px;
-            border: 1px solid rgba(255,0,0,0.5);
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: 1px solid #ff0000;
             backdrop-filter: blur(10px);
         }
 
         .icon-btn {
             width: 50px; height: 50px;
-            border: 1px solid rgba(255,0,0,0.5);
+            border: 1px solid #ff0000;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: #ff0000; font-size: 1.4em;
-        }
-
-        #pulse-ring {
-            width: 30px; height: 30px; border-radius: 50%;
-            background: #ffaa00; box-shadow: 0 0 15px #ffaa00;
-            animation: pulse 2s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(0.9); opacity: 0.7; }
-            50% { transform: scale(1.1); opacity: 1; }
+            cursor: pointer; color: #ff0000; font-size: 1.3em;
         }
     </style>
 </head>
 <body>
 
-    <video id="bg-video" muted loop playsinline>
+    <video id="bg-video" loop playsinline>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
 
+    <div id="music-container" style="position: absolute; width: 0; height: 0; overflow: hidden;"></div>
+
     <div id="hive-population" class="holoframe">
-        <div style="font-size: 0.6em; letter-spacing: 2px; color: #888;">ACTIVE NODES</div>
-        <div id="node-count" style="font-size: 1.4em; font-weight: bold;">1,204,812</div>
+        <div style="font-size: 0.6em; letter-spacing: 2px;">ACTIVE NODES</div>
+        <div id="node-count" style="font-size: 1.3em; font-weight: bold;">1,204,812</div>
     </div>
 
     <div id="landing">
@@ -148,59 +145,56 @@
     </div>
 
     <div id="loading">
-        <div style="letter-spacing: 10px;">UPLINKING...</div>
+        <div style="letter-spacing: 8px;">UPLINKING TO HIVE</div>
         <div class="progress-bar"><div class="progress" id="progress"></div></div>
     </div>
 
     <div id="main-content">
         <div class="holoframe" style="padding: 25px; border-left: 5px solid #ff0000;">
-            <h3 style="letter-spacing: 4px; margin-bottom: 10px;">MISSION BRIEF</h3>
-            <p style="font-style: italic; opacity: 0.8;">"To architect an impenetrable global hive-mind that neutralizes incursions. ARES transforms endpoints into a self-healing defense grid."</p>
-        </div>
-
-        <div class="holoframe" style="padding: 25px; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <div style="font-size: 0.7em; letter-spacing: 2px;">THREAT LEVEL</div>
-                <div id="threat-text" style="font-size: 1.8em; font-weight: bold; color: #ffaa00;">ELEVATED</div>
-            </div>
-            <div id="pulse-ring"></div>
+            <h3 style="letter-spacing: 4px; margin-bottom: 10px;">OPERATIONAL MISSION</h3>
+            <p style="font-style: italic; color: rgba(255,255,255,0.7);">"Architecting an impenetrable global hive-mind to intercept and neutralize digital incursions. Transforming vulnerable endpoints into a unified defense grid."</p>
         </div>
 
         <div class="holoframe" style="padding: 25px;">
-            <h3 style="margin-bottom: 15px;">SCAM SCANNER</h3>
+            <h3 style="margin-bottom: 15px; font-size: 0.9em;">INTEL-LINK SCAM VERIFICATION</h3>
             <div style="display: flex; gap: 10px;">
-                <input type="text" id="link-input" placeholder="URL..." style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid #ff0000; color: #fff; padding: 12px; outline: none;">
+                <input type="text" id="link-input" placeholder="PASTE URL..." style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid #ff0000; color: #fff; padding: 12px; font-family: 'Courier New'; outline: none;">
                 <button onclick="checkLink()" style="background: #ff0000; color: #000; border: none; padding: 0 30px; font-weight: bold; cursor: pointer;">SCAN</button>
             </div>
-            <div id="result-text" style="margin-top: 15px; font-size: 0.8em; color: #888;">[ STANDBY ]</div>
+            <div id="result-text" style="margin-top: 15px; font-size: 0.8em; color: #888;">[ SYSTEM: STANDBY ]</div>
         </div>
     </div>
 
     <div id="bottom-bar">
         <div class="icon-btn" onclick="location.reload()">🛡️</div>
-        <div class="icon-btn" onclick="alert('Access Denied: Level 4 Required')">⚠️</div>
-        <div class="icon-btn" onclick="alert('Repository Encrypted')">📁</div>
+        <div class="icon-btn" onclick="alert('Threat Logs: Encrypted')">⚠️</div>
+        <div class="icon-btn" onclick="alert('Files: Initializing...')">📁</div>
     </div>
 
     <script>
         const enterBtn = document.getElementById('enter-btn');
-        const bgVideo = document.getElementById('bg-video');
+        const video = document.getElementById('bg-video');
+        const music = document.getElementById('music-container');
 
-        // MASTER TRIGGER FOR VIDEO AND UNMUTED MUSIC
+        // THE FIX: Single click event to bypass all browser blocks
         enterBtn.addEventListener('click', () => {
-            // 1. Play Video
-            bgVideo.play().catch(e => console.log("Video error:", e));
+            // 1. Forced Video Play
+            video.style.opacity = "1";
+            video.play().catch(error => {
+                console.log("Video Autoplay failed, but user clicked. Overriding...");
+            });
 
-            // 2. Inject Forced Unmuted Music
-            const musicBox = document.createElement('div');
-            musicBox.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;";
-            musicBox.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" frameborder="0" allow="autoplay"></iframe>`;
-            document.body.appendChild(musicBox);
+            // 2. Forced Music Injection (Unmuted)
+            music.innerHTML = `
+                <iframe width="1" height="1" 
+                src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
+                frameborder="0" allow="autoplay"></iframe>`;
 
             // 3. UI Transition
             document.getElementById('landing').style.display = 'none';
             document.getElementById('loading').style.display = 'flex';
-            setTimeout(() => document.getElementById('progress').style.width = '100%', 100);
+            setTimeout(() => { document.getElementById('progress').style.width = '100%'; }, 100);
+            
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
@@ -209,21 +203,19 @@
 
         // Hive Logic
         setInterval(() => {
-            const count = 1204812 + Math.floor(Math.random() * 40 - 20);
-            document.getElementById('node-count').innerText = count.toLocaleString();
+            const base = 1204812;
+            const jitter = Math.floor(Math.random() * 50) - 25;
+            document.getElementById('node-count').innerText = (base + jitter).toLocaleString();
         }, 2000);
 
-        // Scam Scan Logic
+        // Scan Logic
         function checkLink() {
             const val = document.getElementById('link-input').value;
-            const res = document.getElementById('result-text');
             if(!val) return;
-            res.innerHTML = "[ ACCESSING BLACKLISTS... ]";
+            document.getElementById('result-text').innerHTML = "[ SCANNING GLOBAL BLACKLISTS... ]";
             setTimeout(() => {
-                document.getElementById('threat-text').innerText = "CRITICAL";
-                document.getElementById('threat-text').style.color = "#ff0000";
                 window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(val)}`, '_blank');
-                res.innerHTML = `<span style="color:#ff0000">[ MALICIOUS SIGNATURE DETECTED ]</span>`;
+                document.getElementById('result-text').innerHTML = "[ EXTERNAL INTEL REPORT GENERATED ]";
             }, 1500);
         }
     </script>
