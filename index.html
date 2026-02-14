@@ -13,7 +13,7 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
-            /* Red neon bloom border around entire page */
+            /* Pulsing red neon bloom border around entire page */
             box-shadow: 
                 0 0 20px 5px rgba(255, 0, 0, 0.4),
                 0 0 40px 15px rgba(255, 0, 0, 0.3),
@@ -27,17 +27,16 @@
             100% { box-shadow: 0 0 30px 10px rgba(255,0,0,0.6), 0 0 60px 25px rgba(255,0,0,0.45), 0 0 120px 50px rgba(255,0,0,0.3), inset 0 0 90px 20px rgba(255,0,0,0.25); }
         }
 
-        /* Background video */
+        /* Full-screen background video */
         #bg-video {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             object-fit: cover;
             z-index: -2;
-            opacity: 0.25; /* subtle overlay */
+            opacity: 0.22;
         }
 
-        /* Overlay content wrapper */
         .content-wrapper {
             position: relative;
             z-index: 1;
@@ -50,8 +49,36 @@
             text-align: center;
             font-size: 2.8em;
             text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             letter-spacing: 4px;
+        }
+
+        /* New Request Repo Clone Button */
+        .request-btn-container {
+            text-align: center;
+            margin: 20px 0 40px;
+        }
+
+        .request-repo-btn {
+            display: inline-block;
+            background: rgba(255, 0, 0, 0.7);
+            color: #fff;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 15px 35px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            backdrop-filter: blur(4px);
+        }
+
+        .request-repo-btn:hover {
+            background: #ff0000;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.9);
+            transform: scale(1.05);
         }
 
         hr {
@@ -156,13 +183,17 @@
             user-select: none;
         }
 
-        /* Binary digital rain canvas behind label */
         #digital-rain {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: -1;
             opacity: 0.4;
+        }
+
+        @media (max-width: 768px) {
+            #bg-video { opacity: 0.15; }
+            .request-repo-btn { font-size: 1.1em; padding: 12px 25px; }
         }
     </style>
 </head>
@@ -176,6 +207,14 @@
 
     <div class="content-wrapper">
         <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
+
+        <!-- New Request Repo Clone Button -->
+        <div class="request-btn-container">
+            <a href="mailto:projectaresai@gmail.com?subject=Request%20Repo%20Clone&body=Hello%20Ares%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20clone%20or%20access%20to%20the%20full%20Ares%20repository%20for%20review%2C%20collaboration%2C%20or%20deployment%20purposes.%0A%0APlease%20provide%20details%20or%20a%20private%20clone%20link%20if%20available.%0A%0AThanks%2C%0A[Your%20Name%20/%20Handle]" class="request-repo-btn">
+                REQUEST REPO CLONE
+            </a>
+        </div>
+
         <hr>
 
         {% for offender in offenders %}
@@ -209,13 +248,11 @@
     </div>
 
     <script>
-        // Folder toggle
         function toggleFolder(id) {
             var el = document.getElementById(id);
             el.style.display = (el.style.display === "block") ? "none" : "block";
         }
 
-        // Simple Matrix-style binary digital rain (slow version)
         const canvas = document.getElementById('digital-rain');
         const ctx = canvas.getContext('2d');
 
@@ -231,7 +268,7 @@
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#440000'; // dark red binary
+            ctx.fillStyle = '#440000';
             ctx.font = fontSize + 'px monospace';
 
             for (let i = 0; i < drops.length; i++) {
@@ -242,15 +279,14 @@
                 ctx.fillText(text, x, y);
 
                 if (y > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0; // reset drop
+                    drops[i] = 0;
                 }
                 drops[i]++;
             }
         }
 
-        setInterval(drawRain, 120); // slower rain for subtle effect
+        setInterval(drawRain, 120);
 
-        // Resize handling
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
