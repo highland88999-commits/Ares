@@ -49,3 +49,45 @@ def generate_report(ip):
     
     return f"mailto:{target_email}?subject={safe_subject}&body={safe_body}"
     
+import os
+import json
+from flask import Flask, render_template
+
+app = Flask(__name__)
+EVIDENCE_PATH = "evidence/"
+
+def get_threat_data():
+    threat_list = []
+    # Loop through each IP folder in evidence/
+    for ip_folder in os.listdir(EVIDENCE_PATH):
+        folder_path = os.path.join(EVIDENCE_PATH, ip_folder)
+        if os.path.isdir(folder_path):
+            # Try to load metadata if it exists
+            metadata_file = os.path.join(folder_path, 'metadata.json')
+            if os.path.exists(metadata_file):
+                with open(metadata_file, 'r') as f:
+                    data = json.load(f)
+            else:
+                # Default data if no metadata.json
+                data = {"category": "UNCLASSIFIED", "timestamp": "Unknown", "country": "Global"}
+
+            # Get list of files in the folder (logs, captures)
+            files = os.listdir(folder_path)
+            
+            threat_list.append({
+                "ip": ip_folder,
+                "category": data.get("category"),
+                "timestamp": data.get("timestamp"),
+                "country": data.get("country"),
+                "logs": files
+            })
+    return threat_list
+
+@app.route('/')
+def home():
+    offenders = get_threat_data()
+    return render_template('index.html', offenders=offenders)
+
+if __name__ == "__main__":
+    app.run(debug=True, port=8080)
+    
