@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>ARES | Terminal</title>
     <style>
-        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.55); }
+        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.5); }
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
@@ -25,48 +25,47 @@
         
         #bg-video {
             position: absolute; inset: 0; width: 100%; height: 100%; 
-            object-fit: cover; z-index: 1; filter: brightness(0.4);
+            object-fit: cover; z-index: 1; filter: brightness(0.45);
         }
 
-        /* Slow Dark Light Pulse Overlay */
+        /* Dark Breathing Pulse */
         #pulse-overlay {
             position: absolute; inset: 0; z-index: 2;
-            background: radial-gradient(circle, transparent 10%, rgba(0,0,0,0.9) 100%);
-            animation: darkPulse 10s ease-in-out infinite;
+            background: radial-gradient(circle, transparent 15%, rgba(0,0,0,0.85) 100%);
+            animation: darkPulse 8s ease-in-out infinite;
             pointer-events: none;
         }
 
-        /* --- HOLOFRAMES (TRANSPARENT) --- */
+        /* --- HOLOFRAMES --- */
         .holo-frame {
             position: absolute; background: var(--glass); 
             border: 1px solid rgba(255, 0, 0, 0.2);
-            backdrop-filter: blur(5px); padding: 25px; z-index: 10;
+            backdrop-filter: blur(6px); padding: 25px; z-index: 10;
         }
 
         #frame-mission { top: 100px; left: 40px; width: 420px; }
-        #frame-logs { bottom: 40px; left: 40px; width: 400px; height: 200px; overflow: hidden; }
+        #frame-logs { bottom: 40px; left: 40px; width: 400px; height: 220px; overflow: hidden; }
         #frame-scanner { top: 100px; right: 40px; width: 380px; }
 
-        /* --- COMMS TOGGLE (TOP RIGHT) --- */
-        #comms-control {
+        /* --- PLAY/PAUSE CONTROL (TOP RIGHT) --- */
+        #media-control {
             position: fixed; top: 30px; right: 40px; z-index: 100;
             background: var(--glass); border: 1px solid var(--ares-red);
             padding: 10px 25px; color: var(--ares-red); font-weight: bold;
-            cursor: pointer; letter-spacing: 2px; text-shadow: 0 0 5px var(--ares-red);
+            cursor: pointer; letter-spacing: 3px;
         }
 
-        /* --- CONTENT STYLING --- */
-        h2 { color: var(--ares-red); font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,0,0,0.2); padding-bottom: 5px; }
-        .log-line { font-size: 0.75rem; color: var(--ares-red); margin-bottom: 4px; opacity: 0.7; }
+        /* --- CONTENT --- */
+        h2 { color: var(--ares-red); font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,0,0,0.2); }
+        .log-line { font-size: 0.75rem; color: var(--ares-red); margin-bottom: 4px; opacity: 0.8; }
         input { width: 100%; padding: 12px; background: rgba(0,0,0,0.7); border: 1px solid var(--ares-red); color: #fff; outline: none; margin-bottom: 12px; }
         button.action-btn { width: 100%; padding: 12px; background: var(--ares-red); color: #000; border: none; font-weight: bold; cursor: pointer; }
 
-        /* --- AUDIO PIPE --- */
         #audio-engine { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
         @keyframes darkPulse {
             0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.85; }
+            50% { opacity: 0.9; }
         }
     </style>
 </head>
@@ -84,17 +83,15 @@
     <div id="pulse-overlay"></div>
     <div id="audio-engine"></div>
 
-    <button id="comms-control" onclick="toggleAudio()">COMMS: OFFLINE</button>
+    <button id="media-control" onclick="toggleMedia()">PLAY PLAYLIST</button>
 
     <div id="frame-mission" class="holo-frame">
         <h2>MISSION PROFILE</h2>
-        <p style="font-size: 0.9rem; line-height: 1.6; opacity: 0.9;">
-            ARES is an autonomous defensive intelligence. Your mission is to monitor global traffic signatures and neutralize digital scams before they penetrate the user perimeter.
-        </p>
+        <p style="font-size: 0.9rem; line-height: 1.6;">ARES decentralized defense protocol. Monitor global traffic signatures and neutralize digital threats at the edge of the network.</p>
     </div>
 
     <div id="frame-scanner" class="holo-frame">
-        <h2>SCAM DETECTOR</h2>
+        <h2>SCAM CHECKER</h2>
         <input type="text" id="scan-input" placeholder="URL SIGNATURE...">
         <button class="action-btn" onclick="runScan()">EXECUTE SCAN</button>
     </div>
@@ -106,17 +103,15 @@
 </div>
 
 <script>
-    let isMuted = true;
+    let isPlaying = false;
     const playlistID = "PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV";
 
     function ignite() {
         document.getElementById('gate').style.display = 'none';
         document.getElementById('main-ui').style.display = 'block';
-
-        // Background Video: Play Muted
         document.getElementById('bg-video').play();
 
-        // Audio Engine: Start Playlist MUTED (Ensures it loads without browser block)
+        // Initialize engine with muted stream to start buffering immediately
         const engine = document.getElementById('audio-engine');
         engine.innerHTML = `<iframe id="yt-pipe" width="1" height="1" 
             src="https://www.youtube.com/embed/videoseries?list=${playlistID}&autoplay=1&mute=1" 
@@ -125,24 +120,20 @@
         setInterval(simulateLogs, 1500);
     }
 
-    function toggleAudio() {
-        const btn = document.getElementById('comms-control');
+    function toggleMedia() {
+        const btn = document.getElementById('media-control');
         const engine = document.getElementById('audio-engine');
         
-        if (isMuted) {
-            // Unmute via fresh injection
+        if (!isPlaying) {
+            // "Play" function: Replace muted stream with unmuted stream
             engine.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=${playlistID}&autoplay=1&mute=0" allow="autoplay"></iframe>`;
-            btn.innerHTML = "COMMS: ONLINE";
-            btn.style.color = "#00ff00";
-            btn.style.borderColor = "#00ff00";
-            isMuted = false;
+            btn.innerHTML = "PAUSE PLAYLIST";
+            isPlaying = true;
         } else {
-            // Mute
-            engine.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=${playlistID}&autoplay=1&mute=1" allow="autoplay"></iframe>`;
-            btn.innerHTML = "COMMS: OFFLINE";
-            btn.style.color = "var(--ares-red)";
-            btn.style.borderColor = "var(--ares-red)";
-            isMuted = true;
+            // "Pause" function: Kill the frame entirely
+            engine.innerHTML = ''; 
+            btn.innerHTML = "PLAY PLAYLIST";
+            isPlaying = false;
         }
     }
 
@@ -153,7 +144,7 @@
 
     function simulateLogs() {
         const container = document.getElementById('log-container');
-        const threats = ["IP HIJACK PREVENTED", "DNS POISONING DETECTED", "XSS PAYLOAD NEUTRALIZED", "SIGNAL BLOCKED"];
+        const threats = ["IP HIJACK PREVENTED", "DNS POISONING DETECTED", "SIGNAL BLOCKED", "ENCRYPTION ACTIVE"];
         const div = document.createElement('div');
         div.className = 'log-line';
         div.innerHTML = `> [${new Date().toLocaleTimeString()}] ${threats[Math.floor(Math.random()*threats.length)]}`;
