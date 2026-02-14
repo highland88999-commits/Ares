@@ -23,13 +23,17 @@
         /* --- STAGE 2: TERMINAL --- */
         #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
         
-        /* Video: Strictly Muted */
+        /* Video: Strictly Muted Background */
         #bg-video {
             position: absolute; inset: 0; width: 100%; height: 100%; 
-            object-fit: cover; z-index: 5; filter: brightness(0.4);
+            object-fit: cover; z-index: 5; filter: brightness(0.4); pointer-events: none;
         }
 
-        /* Data Layers */
+        /* Audio Engine: 1px Ghost Iframe (Bypasses Mobile Silence) */
+        #audio-engine {
+            position: absolute; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.01; z-index: 1;
+        }
+
         #hive-pop {
             position: fixed; top: 20px; right: 20px; z-index: 2000;
             text-align: right; color: var(--ares-red); font-weight: bold;
@@ -41,9 +45,7 @@
             z-index: 2000; overflow: hidden; font-size: 0.7rem; color: rgba(255, 0, 0, 0.6);
             pointer-events: none; display: flex; flex-direction: column-reverse;
         }
-        .log-entry { margin-bottom: 4px; }
 
-        /* Terminal Content (1mm Floating Rule) */
         #terminal-shell {
             position: relative; z-index: 100; padding: 20px;
             height: calc(100vh - 100px); overflow-y: auto; display: flex; justify-content: center;
@@ -55,7 +57,6 @@
             backdrop-filter: blur(20px); box-shadow: 0 0 50px #000;
         }
 
-        /* Nav Dock */
         #hud-dock {
             position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 20px; z-index: 1000;
@@ -79,7 +80,7 @@
 </div>
 
 <div id="main-terminal">
-    <video id="bg-video" loop playsinline muted autoplay>
+    <video id="bg-video" loop playsinline muted>
         <source src="https://raw.githubusercontent.com/highland88999-commits/Ares/main/assets/No_people..._Ad.mp4" type="video/mp4">
     </video>
 
@@ -113,21 +114,29 @@
 
 <script>
     function igniteAres() {
-        // UI Switch
+        // 1. UI Switch
         document.getElementById('entry-gate').style.display = 'none';
         document.getElementById('main-terminal').style.display = 'block';
 
-        // Background Video stays muted (per instruction)
-        document.getElementById('bg-video').play();
+        // 2. Play Muted Video
+        const bgVid = document.getElementById('bg-video');
+        bgVid.play().catch(e => console.log("Video Playback Pending..."));
 
-        // INJECT PLAYLIST (UNMUTED)
-        // This fires on the click gesture to ensure autoplay works
-        document.getElementById('audio-engine').innerHTML = `
-            <iframe width="0" height="0" 
-            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
-            frameborder="0" allow="autoplay"></iframe>
+        // 3. FORCE AUDIO INJECTION
+        // Using the 'videoseries' parameter and ensuring 'allow=autoplay'
+        // Index=0 forces the first video to start immediately
+        const audioBox = document.getElementById('audio-engine');
+        audioBox.innerHTML = `
+            <iframe 
+                width="100" height="100" 
+                src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0&index=0&enablejsapi=1" 
+                frameborder="0" 
+                allow="autoplay; encrypted-media" 
+                style="border:none;">
+            </iframe>
         `;
 
+        // 4. Start Terminal Effects
         setInterval(logTick, 800);
     }
 
@@ -148,7 +157,7 @@
     function logTick() {
         const log = document.getElementById('hunter-log');
         const entry = document.createElement('div');
-        entry.className = 'log-entry';
+        entry.style.marginBottom = "4px";
         entry.innerHTML = `> TRACING NODE ${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)} [LOCKED]`;
         log.prepend(entry);
         if(log.children.length > 8) log.lastChild.remove();
