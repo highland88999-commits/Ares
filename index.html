@@ -3,30 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>ARES | Global Security Terminal</title>
+    <title>ARES | Terminal</title>
     <style>
-        :root {
-            --ares-red: #ff0000;
-            --ares-amber: #ffaa00;
-            --glass: rgba(15, 0, 0, 0.4);
-        }
-
+        :root { --ares-red: #ff0000; --glass: rgba(10, 0, 0, 0.7); }
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
-        /* --- STAGE 1: SIGNAL GATE --- */
+        /* GATE */
         #entry-gate {
             position: fixed; inset: 0; z-index: 9999; background: #000;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .gate-btn {
-            padding: 25px 50px; border: 2px solid var(--ares-red); border-radius: 4px;
-            color: var(--ares-red); letter-spacing: 15px; font-size: 1.2rem;
-            text-shadow: 0 0 15px var(--ares-red); box-shadow: 0 0 30px rgba(255,0,0,0.2);
-            animation: breathe 3s infinite;
+            padding: 25px 50px; border: 2px solid var(--ares-red);
+            color: var(--ares-red); letter-spacing: 10px; text-shadow: 0 0 10px var(--ares-red);
+            animation: pulse 2s infinite;
         }
 
-        /* --- STAGE 2: MAIN TERMINAL --- */
+        /* MAIN */
         #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
         
         #bg-video {
@@ -34,143 +28,107 @@
             object-fit: cover; z-index: 5; filter: brightness(0.4);
         }
 
-        #hive-population {
-            position: fixed; top: 20px; right: 20px; padding: 12px 25px; z-index: 2001; 
-            text-align: right; border-left: 4px solid var(--ares-red);
-            background: var(--glass); backdrop-filter: blur(10px); border-radius: 4px;
-        }
-
-        /* 1mm Floating Rule: Height calc leaves gap for the 90px dock area */
         #terminal-shell {
-            position: relative; z-index: 100; padding: 30px;
-            height: calc(100vh - 105px); 
-            overflow-y: auto;
+            position: relative; z-index: 100; padding: 20px;
+            height: calc(100vh - 100px); overflow-y: auto;
         }
 
         .holo-window {
-            background: var(--glass); border: 1px solid rgba(255, 0, 0, 0.3);
-            box-shadow: 0 0 25px rgba(255, 0, 0, 0.1);
-            border-radius: 4px; backdrop-filter: blur(20px);
-            padding: 30px; margin-bottom: 20px; width: 100%; max-width: 800px;
+            background: var(--glass); border: 1px solid var(--ares-red);
+            padding: 25px; margin-bottom: 20px; border-radius: 4px;
+            backdrop-filter: blur(10px);
         }
 
-        .holo-header {
-            color: var(--ares-red); text-shadow: 0 0 10px var(--ares-red);
-            letter-spacing: 5px; font-size: 1.1rem; margin-bottom: 15px;
-        }
-
-        /* --- NAVIGATION DOCK --- */
         #hud-dock {
-            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 30px; z-index: 1000;
-            background: rgba(0,0,0,0.85); padding: 12px 40px; border-radius: 60px;
-            border: 1px solid var(--ares-red); backdrop-filter: blur(12px);
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.9); padding: 15px 30px; border-radius: 50px;
+            border: 1px solid var(--ares-red);
         }
-        .icon {
-            width: 55px; height: 55px; border: 1px solid var(--ares-red);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 1.4rem; color: var(--ares-red); transition: 0.4s;
-        }
-        .icon.active { background: var(--ares-red); color: #000; box-shadow: 0 0 20px var(--ares-red); }
 
-        @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .icon {
+            width: 50px; height: 50px; border: 1px solid var(--ares-red);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--ares-red); font-size: 1.2rem;
+        }
+
+        .icon.active { background: var(--ares-red); color: #000; }
+
+        #hive-pop {
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            text-align: right; color: var(--ares-red); font-weight: bold;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div id="entry-gate" onclick="initAres()">
+<div id="entry-gate" onclick="startAres()">
     <div class="gate-btn">INITIATE ARES</div>
 </div>
 
 <div id="main-terminal">
-    <video id="bg-video" loop playsinline>
+    <video id="bg-video" loop playsinline muted>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
 
-    <div id="audio-engine" style="display:none;"></div>
+    <div id="music-layer" style="position: absolute; visibility: hidden;"></div>
 
-    <div id="hive-population">
-        <div style="font-size: 0.6em; letter-spacing: 2px; color: #888;">ACTIVE HIVE NODES</div>
-        <div id="node-count" style="font-size: 1.3em; font-weight: bold; color: var(--ares-red);">1,204,812</div>
-    </div>
+    <div id="hive-pop">HIVE NODES: <span id="nodes">1,204,812</span></div>
 
     <div id="terminal-shell">
-        <div id="win-brief" class="holo-window">
-            <h2 class="holo-header">MISSION BRIEF</h2>
-            <p style="font-style: italic; color: rgba(255,255,255,0.8); line-height: 1.6;">
-                "To architect an impenetrable global hive-mind that anticipates, intercepts, and neutralizes digital incursions before they breach the perimeter."
-            </p>
+        <div id="win-1" class="holo-window">
+            <h2 style="color:var(--ares-red); margin-bottom:10px;">SYSTEM READY</h2>
+            <p>ARES Intelligence Grid is now active. Monitoring global traffic signatures.</p>
         </div>
-
-        <div id="win-scanner" class="holo-window" style="display:none;">
-            <h2 class="holo-header">SCAM SCANNER</h2>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="link-input" placeholder="PASTE URL..." 
-                       style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--ares-red); color: #fff; padding: 12px; font-family: 'Courier New'; outline: none;">
-                <button onclick="checkLink()" style="background: var(--ares-red); color: #000; border: none; padding: 0 30px; font-weight: bold; cursor: pointer;">SCAN</button>
-            </div>
-            <div id="result-text" style="margin-top: 15px; font-size: 0.8em; color: var(--ares-amber);">[ STATUS: STANDBY ]</div>
+        
+        <div id="win-2" class="holo-window" style="display:none;">
+            <h2 style="color:var(--ares-red); margin-bottom:10px;">SCANNER</h2>
+            <input type="text" id="scan-in" placeholder="URL..." style="width:70%; padding:10px; background:#000; border:1px solid var(--ares-red); color:#fff;">
+            <button onclick="doScan()" style="padding:10px; background:var(--ares-red); color:#000; border:none; cursor:pointer;">SCAN</button>
         </div>
     </div>
 
     <div id="hud-dock">
-        <div class="icon active" id="btn-brief" onclick="toggleView('brief', this)">🛡️</div>
-        <div class="icon" id="btn-scanner" onclick="toggleView('scanner', this)">⚠️</div>
+        <div class="icon active" onclick="showWin(1, this)">🛡️</div>
+        <div class="icon" onclick="showWin(2, this)">⚠️</div>
     </div>
 </div>
 
 <script>
-    function initAres() {
-        // 1. Hide Gate
+    function startAres() {
         document.getElementById('entry-gate').style.display = 'none';
-        
-        // 2. Show Terminal
         document.getElementById('main-terminal').style.display = 'block';
 
-        // 3. Forced Video Play (Unmuted)
-        const vid = document.getElementById('bg-video');
-        vid.muted = false; 
-        vid.play().catch(e => console.log("Video requires manual trigger:", e));
+        // Start Video & Unmute
+        const v = document.getElementById('bg-video');
+        v.muted = false;
+        v.play();
 
-        // 4. Inject Music via Dutchman Logic (Embed Mode)
-        document.getElementById('audio-engine').innerHTML = `
+        // Start Music (Using the Dutchman Iframe Injection Logic)
+        document.getElementById('music-layer').innerHTML = `
             <iframe width="1" height="1" 
-            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
-            frameborder="0" allow="autoplay"></iframe>
-        `;
+            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1" 
+            allow="autoplay"></iframe>`;
     }
 
-    // Live Hive Counter
-    setInterval(() => {
-        const count = 1204812 + Math.floor(Math.random() * 40 - 20);
-        document.getElementById('node-count').innerText = count.toLocaleString();
-    }, 2000);
-
-    // Toggle Logic (Clean switch between windows)
-    function toggleView(id, btn) {
-        // Hide all windows
-        document.getElementById('win-brief').style.display = 'none';
-        document.getElementById('win-scanner').style.display = 'none';
-        
-        // Remove active class from all icons
+    function showWin(num, el) {
+        document.getElementById('win-1').style.display = 'none';
+        document.getElementById('win-2').style.display = 'none';
         document.querySelectorAll('.icon').forEach(i => i.classList.remove('active'));
-
-        // Show selected and set active
-        document.getElementById('win-' + id).style.display = 'block';
-        btn.classList.add('active');
+        document.getElementById('win-' + num).style.display = 'block';
+        el.classList.add('active');
     }
 
-    // Scan Logic
-    function checkLink() {
-        const val = document.getElementById('link-input').value;
-        const res = document.getElementById('result-text');
-        if(!val) return;
-        res.innerHTML = "[ ACCESSING GLOBAL BLACKLISTS... ]";
-        setTimeout(() => {
-            window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(val)}`, '_blank');
-            res.innerHTML = "[ SCAN COMPLETE: EXTERNAL REPORT OPENED ]";
-        }, 1500);
+    function doScan() {
+        const url = document.getElementById('scan-in').value;
+        if(url) window.open('https://www.google.com/search?q=scam+report+' + url, '_blank');
     }
+
+    setInterval(() => {
+        document.getElementById('nodes').innerText = (1204812 + Math.floor(Math.random()*50)).toLocaleString();
+    }, 1000);
 </script>
 </body>
 </html>
