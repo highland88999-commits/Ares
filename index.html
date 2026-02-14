@@ -16,7 +16,7 @@
             position: relative;
         }
 
-        /* --- DOCKET: BACKGROUND VIDEO LOGIC --- */
+        /* --- BACKGROUND VIDEO (Muted for Cinematic Backdrop) --- */
         #bg-video {
             position: fixed;
             inset: 0;
@@ -28,20 +28,18 @@
             filter: brightness(0.4);
         }
 
-        /* --- GLASS HOLOFRAMES (Backdrop Filter Logic) --- */
+        /* --- GLASS HOLOFRAMES --- */
         .holoframe {
             background: rgba(255, 0, 0, 0.04);
             backdrop-filter: blur(15px) saturate(180%);
             -webkit-backdrop-filter: blur(15px) saturate(180%);
             border: 1px solid rgba(255, 0, 0, 0.3);
-            box-shadow: 0 0 25px rgba(255, 0, 0, 0.1), inset 0 0 10px rgba(255,0,0,0.05);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.1);
             border-radius: 4px;
             margin-bottom: 20px;
-            transition: all 0.4s ease;
         }
 
-        /* --- DOCKET: FLOATING SPACING RULE (1mm / 4px gap) --- */
-        /* Logic: Dock (80px) + Bottom Offset (15px) + 1mm Gap (4px) = 99px total safety height */
+        /* --- 1MM FLOATING RULE (99px offset) --- */
         #main-content {
             display: none;
             padding: 30px;
@@ -51,7 +49,6 @@
             z-index: 10;
         }
 
-        /* --- HIVE POPULATION (TOP RIGHT) --- */
         #hive-population {
             position: fixed;
             top: 20px;
@@ -62,7 +59,7 @@
             border-left: 4px solid #ff0000;
         }
 
-        /* --- LANDING & LOADING --- */
+        /* --- LANDING SYSTEM --- */
         #landing {
             position: fixed;
             inset: 0;
@@ -74,22 +71,15 @@
         }
 
         #enter-btn {
-            background: rgba(255, 0, 0, 0.05);
+            background: rgba(255, 0, 0, 0.1);
             color: #fff;
             font-size: 2.2em;
             padding: 25px 60px;
             border: 2px solid #ff0000;
             cursor: pointer;
             letter-spacing: 15px;
-            box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
-            transition: 0.4s;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.4);
             text-transform: uppercase;
-        }
-
-        #enter-btn:hover {
-            background: #ff0000;
-            color: #000;
-            box-shadow: 0 0 80px #ff0000;
         }
 
         #loading {
@@ -103,8 +93,8 @@
             align-items: center;
         }
 
-        .progress-bar { width: 400px; height: 2px; background: #200; margin-top: 25px; border-radius: 2px; }
-        .progress { width: 0; height: 100%; background: #ff0000; transition: width 3.2s cubic-bezier(0.1, 0, 0.3, 1); }
+        .progress-bar { width: 300px; height: 2px; background: #200; margin-top: 20px; }
+        .progress { width: 0; height: 100%; background: #ff0000; transition: width 3s linear; }
 
         /* --- NAVIGATION DOCK --- */
         #bottom-bar {
@@ -115,45 +105,31 @@
             z-index: 2000;
             display: flex;
             gap: 25px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             padding: 15px 40px;
             border-radius: 60px;
             border: 1px solid rgba(255,0,0,0.5);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
         }
 
         .icon-btn {
-            width: 55px; height: 55px;
-            border: 1px solid rgba(255,0,0,0.4);
+            width: 50px; height: 50px;
+            border: 1px solid rgba(255,0,0,0.5);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: #ff0000; font-size: 1.5em; transition: 0.3s;
+            cursor: pointer; color: #ff0000; font-size: 1.4em;
         }
 
-        .icon-btn.active { background: #ff0000; color: #000; box-shadow: 0 0 25px #ff0000; border-color: #ff0000; }
-
-        /* --- THREAT METER ANIMATIONS --- */
         #pulse-ring {
-            width: 35px; height: 35px; border-radius: 50%;
-            background: #ffaa00; box-shadow: 0 0 20px #ffaa00;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: #ffaa00; box-shadow: 0 0 15px #ffaa00;
             animation: pulse 2s infinite ease-in-out;
-        }
-
-        .pulse-critical {
-            animation: pulse 0.35s infinite ease-in-out !important;
-            background: #ff0000 !important;
-            box-shadow: 0 0 40px #ff0000 !important;
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(0.9); opacity: 0.7; }
             50% { transform: scale(1.1); opacity: 1; }
         }
-
-        /* --- UTILS --- */
-        .critical-text { color: #ff0000 !important; text-shadow: 0 0 15px #ff0000; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -163,8 +139,8 @@
     </video>
 
     <div id="hive-population" class="holoframe">
-        <div style="font-size: 0.65em; letter-spacing: 3px; color: rgba(255,255,255,0.6);">ACTIVE HIVE NODES</div>
-        <div id="node-count" style="font-size: 1.5em; font-weight: bold; text-shadow: 0 0 15px #ff0000;">1,204,812</div>
+        <div style="font-size: 0.6em; letter-spacing: 2px; color: #888;">ACTIVE NODES</div>
+        <div id="node-count" style="font-size: 1.4em; font-weight: bold;">1,204,812</div>
     </div>
 
     <div id="landing">
@@ -172,114 +148,84 @@
     </div>
 
     <div id="loading">
-        <div style="letter-spacing: 12px; font-size: 1.2em;">SYNCHRONIZING HIVE</div>
+        <div style="letter-spacing: 10px;">UPLINKING...</div>
         <div class="progress-bar"><div class="progress" id="progress"></div></div>
     </div>
 
     <div id="main-content">
-        <div class="holoframe" style="padding: 30px; border-left: 6px solid #ff0000;">
-            <h3 style="letter-spacing: 5px; margin-bottom: 12px; font-size: 1em; color: #fff;">OPERATIONAL MISSION</h3>
-            <p style="font-style: italic; color: rgba(255,255,255,0.75); line-height: 1.7; font-size: 1em;">
-                "To architect an impenetrable global hive-mind that anticipates, intercepts, and neutralizes digital incursions before they breach the perimeter. ARES exists to reclaim the sovereignty of the web, transforming vulnerable endpoints into a unified, self-healing defense grid that renders malicious access obsolete."
-            </p>
+        <div class="holoframe" style="padding: 25px; border-left: 5px solid #ff0000;">
+            <h3 style="letter-spacing: 4px; margin-bottom: 10px;">MISSION BRIEF</h3>
+            <p style="font-style: italic; opacity: 0.8;">"To architect an impenetrable global hive-mind that neutralizes incursions. ARES transforms endpoints into a self-healing defense grid."</p>
         </div>
 
         <div class="holoframe" style="padding: 25px; display: flex; align-items: center; justify-content: space-between;">
             <div>
-                <div style="font-size: 0.75em; letter-spacing: 3px; color: #888; margin-bottom: 5px;">NETWORK THREAT STATUS</div>
-                <div id="threat-text" style="font-size: 1.8em; font-weight: bold; color: #ffaa00; transition: 0.3s;">ELEVATED</div>
+                <div style="font-size: 0.7em; letter-spacing: 2px;">THREAT LEVEL</div>
+                <div id="threat-text" style="font-size: 1.8em; font-weight: bold; color: #ffaa00;">ELEVATED</div>
             </div>
             <div id="pulse-ring"></div>
         </div>
 
-        <div class="holoframe" style="padding: 30px;">
-            <h3 style="margin-bottom: 18px; font-size: 0.9em; letter-spacing: 4px; color: #fff;">LINK SCAM VERIFICATION</h3>
-            <div style="display: flex; gap: 15px;">
-                <input type="text" id="link-input" placeholder="PASTE SUSPICIOUS URL FOR SCANNING..." 
-                       style="flex-grow: 1; background: rgba(0,0,0,0.6); border: 1px solid #ff0000; color: #fff; padding: 15px; font-family: 'Courier New'; outline: none; font-size: 1em;">
-                <button onclick="checkLink()" style="background: #ff0000; color: #000; border: none; padding: 0 40px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;">SCAN</button>
+        <div class="holoframe" style="padding: 25px;">
+            <h3 style="margin-bottom: 15px;">SCAM SCANNER</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="link-input" placeholder="URL..." style="flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid #ff0000; color: #fff; padding: 12px; outline: none;">
+                <button onclick="checkLink()" style="background: #ff0000; color: #000; border: none; padding: 0 30px; font-weight: bold; cursor: pointer;">SCAN</button>
             </div>
-            <div id="result-text" style="margin-top: 20px; font-size: 0.9em; color: #888; font-family: monospace;">[ SYSTEM_STATUS: STANDBY ]</div>
+            <div id="result-text" style="margin-top: 15px; font-size: 0.8em; color: #888;">[ STANDBY ]</div>
         </div>
     </div>
 
     <div id="bottom-bar">
-        <div class="icon-btn active" id="nav-core">🛡️</div>
-        <div class="icon-btn" onclick="alert('Threat Logs: Accessing Secure Nodes...')">⚠️</div>
-        <div class="icon-btn" onclick="alert('Files Manifest: Initializing Secure Repository...')">📁</div>
+        <div class="icon-btn" onclick="location.reload()">🛡️</div>
+        <div class="icon-btn" onclick="alert('Access Denied: Level 4 Required')">⚠️</div>
+        <div class="icon-btn" onclick="alert('Repository Encrypted')">📁</div>
     </div>
 
     <script>
-        // --- DOCKET: INVISIBLE AUDIO & VIDEO INITIALIZATION ---
-        function startAresSystems() {
-            const video = document.getElementById('bg-video');
-            video.play();
+        const enterBtn = document.getElementById('enter-btn');
+        const bgVideo = document.getElementById('bg-video');
 
-            // Docket: Invisible YouTube Audio (Unmuted Force Play)
-            const audioVault = document.createElement('div');
-            audioVault.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;";
-            audioVault.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" frameborder="0" allow="autoplay"></iframe>`;
-            document.body.appendChild(audioVault);
+        // MASTER TRIGGER FOR VIDEO AND UNMUTED MUSIC
+        enterBtn.addEventListener('click', () => {
+            // 1. Play Video
+            bgVideo.play().catch(e => console.log("Video error:", e));
 
-            // Interface Transition
+            // 2. Inject Forced Unmuted Music
+            const musicBox = document.createElement('div');
+            musicBox.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;";
+            musicBox.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" frameborder="0" allow="autoplay"></iframe>`;
+            document.body.appendChild(musicBox);
+
+            // 3. UI Transition
             document.getElementById('landing').style.display = 'none';
             document.getElementById('loading').style.display = 'flex';
-            
-            setTimeout(() => { document.getElementById('progress').style.width = '100%'; }, 100);
-            
+            setTimeout(() => document.getElementById('progress').style.width = '100%', 100);
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
-            }, 3500);
-        }
-
-        document.getElementById('enter-btn').addEventListener('click', startAresSystems);
-
-        // --- HIVE POPULATION LOGIC ---
-        function updateHivePopulation() {
-            const base = 1204812;
-            const jitter = Math.floor(Math.random() * 60) - 30;
-            document.getElementById('node-count').innerText = (base + jitter).toLocaleString();
-        }
-        setInterval(updateHivePopulation, 2500);
-
-        // --- SCAM SCAN & THREAT ESCALATION ---
-        function checkLink() {
-            const input = document.getElementById('link-input').value;
-            const resText = document.getElementById('result-text');
-            const threatText = document.getElementById('threat-text');
-            const pulse = document.getElementById('pulse-ring');
-
-            if(!input) return;
-
-            resText.innerHTML = `<span style="color: #ffaa00;">[ UPLINKING TO HIVE... ANALYZING BLACKLISTS ]</span>`;
-            
-            setTimeout(() => {
-                // Escalate to Critical
-                threatText.innerText = "CRITICAL";
-                threatText.classList.add('critical-text');
-                pulse.classList.add('pulse-critical');
-                resText.innerHTML = `<span style="color: #ff0000;">[ WARNING: MALICIOUS SIGNATURE DETECTED - OPENING INTEL ]</span>`;
-                
-                // Secure Intel Query
-                window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(input)}`, '_blank');
-
-                // Cool down system after search
-                setTimeout(() => {
-                    threatText.innerText = "ELEVATED";
-                    threatText.classList.remove('critical-text');
-                    pulse.classList.remove('pulse-critical');
-                    resText.innerHTML = "[ SYSTEM_STATUS: STANDBY ]";
-                }, 7000);
-            }, 1800);
-        }
-
-        // Toggle Main Content
-        document.getElementById('nav-core').addEventListener('click', function() {
-            const content = document.getElementById('main-content');
-            content.style.display = (content.style.display === 'none') ? 'block' : 'none';
-            this.classList.toggle('active');
+            }, 3200);
         });
+
+        // Hive Logic
+        setInterval(() => {
+            const count = 1204812 + Math.floor(Math.random() * 40 - 20);
+            document.getElementById('node-count').innerText = count.toLocaleString();
+        }, 2000);
+
+        // Scam Scan Logic
+        function checkLink() {
+            const val = document.getElementById('link-input').value;
+            const res = document.getElementById('result-text');
+            if(!val) return;
+            res.innerHTML = "[ ACCESSING BLACKLISTS... ]";
+            setTimeout(() => {
+                document.getElementById('threat-text').innerText = "CRITICAL";
+                document.getElementById('threat-text').style.color = "#ff0000";
+                window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(val)}`, '_blank');
+                res.innerHTML = `<span style="color:#ff0000">[ MALICIOUS SIGNATURE DETECTED ]</span>`;
+            }, 1500);
+        }
     </script>
 </body>
 </html>
