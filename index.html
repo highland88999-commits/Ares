@@ -1,7 +1,56 @@
-<div class="ip-folder">
-    <h3>Attacker: {{ ip }}</h3>
-    <p>Status: In the Void</p>
-    <a href="/generate_report/{{ ip }}" class="btn-report">
-        Engage {{ country_name }} Authorities
-    </a>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ARES | Global Command</title>
+    <style>
+        body { background: #0f0f0f; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; }
+        .folder-container { border: 1px solid #333; margin-bottom: 10px; border-radius: 5px; overflow: hidden; }
+        .folder-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .folder-header:hover { background: #222; }
+        .folder-content { display: none; padding: 15px; background: #0a0a0a; border-top: 1px solid #333; }
+        .crime-tag { background: #ff0000; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; text-transform: uppercase; }
+        .btn-report { background: #d9534f; color: white; text-decoration: none; padding: 10px; display: inline-block; margin-top: 10px; border-radius: 3px; }
+        .ip-text { font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
+    <hr>
+
+    {% for offender in offenders %}
+    <div class="folder-container">
+        <div class="folder-header" onclick="toggleFolder('{{ offender.ip }}')">
+            <div>
+                <span class="ip-text">📂 {{ offender.ip }}</span>
+                <span style="margin-left: 20px; color: #888;">Detected: {{ offender.timestamp }}</span>
+            </div>
+            <span class="crime-tag">{{ offender.category }}</span>
+        </div>
+
+        <div id="{{ offender.ip }}" class="folder-content">
+            <h4>Alleged Crimes:</h4>
+            <ul>
+                {% for log in offender.logs %}
+                <li><code>{{ log }}</code></li>
+                {% endfor %}
+            </ul>
+            <p><strong>Status:</strong> Permanently in the Void.</p>
+            <a href="/generate_report/{{ offender.ip }}" class="btn-report">Engage {{ offender.country }} Authorities</a>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        function toggleFolder(id) {
+            var x = document.getElementById(id);
+            if (x.style.display === "none" || x.style.display === "") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
+    
