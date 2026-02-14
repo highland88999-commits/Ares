@@ -1,0 +1,30 @@
+name: Ares Global Pulse
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour, on the hour
+
+jobs:
+  scout_mission:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # This spins up multiple parallel runners (the "100 agents")
+        agent_id: [1, 2, 3, 4, 5] # Scale this as needed
+    
+    steps:
+      - name: Checkout Ares Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Deploy Scout Agent
+        env:
+          ARES_HUB_KEY: ${{ secrets.ARES_HUB_KEY }}
+        run: |
+          pip install requests
+          # Each agent takes a slice of the global 'Most Wanted' list
+          python3 sentinel/scout.py --agent-id ${{ matrix.agent_id }}
