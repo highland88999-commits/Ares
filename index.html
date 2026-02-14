@@ -14,7 +14,7 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
-        /* --- STAGE 1: SIGNAL GATE (Entry logic) --- */
+        /* --- STAGE 1: SIGNAL GATE --- */
         #entry-gate {
             position: fixed; inset: 0; z-index: 9999; background: #000;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
@@ -29,24 +29,21 @@
         /* --- STAGE 2: MAIN TERMINAL --- */
         #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
         
-        /* Background Video Logic */
         #bg-video {
             position: absolute; inset: 0; width: 100%; height: 100%; 
             object-fit: cover; z-index: 5; filter: brightness(0.4);
         }
 
-        /* Hive Counter (Top Right) */
         #hive-population {
             position: fixed; top: 20px; right: 20px; padding: 12px 25px; z-index: 2001; 
             text-align: right; border-left: 4px solid var(--ares-red);
             background: var(--glass); backdrop-filter: blur(10px); border-radius: 4px;
         }
 
-        /* --- HOLOFRAMES (1mm Floating Rule Logic) --- */
+        /* 1mm Floating Rule: Height calc leaves gap for the 90px dock area */
         #terminal-shell {
             position: relative; z-index: 100; padding: 30px;
-            /* Enforcement of 1mm gap (4px) above the 90px dock */
-            height: calc(100vh - 94px); 
+            height: calc(100vh - 105px); 
             overflow-y: auto;
         }
 
@@ -66,7 +63,7 @@
         #hud-dock {
             position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 30px; z-index: 1000;
-            background: rgba(0,0,0,0.8); padding: 10px 40px; border-radius: 50px;
+            background: rgba(0,0,0,0.85); padding: 12px 40px; border-radius: 60px;
             border: 1px solid var(--ares-red); backdrop-filter: blur(12px);
         }
         .icon {
@@ -86,11 +83,11 @@
 </div>
 
 <div id="main-terminal">
-    <video id="bg-video" loop playsinline muted>
+    <video id="bg-video" loop playsinline>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
 
-    <div id="audio-engine"></div>
+    <div id="audio-engine" style="display:none;"></div>
 
     <div id="hive-population">
         <div style="font-size: 0.6em; letter-spacing: 2px; color: #888;">ACTIVE HIVE NODES</div>
@@ -105,7 +102,7 @@
             </p>
         </div>
 
-        <div id="win-scanner" class="holo-window">
+        <div id="win-scanner" class="holo-window" style="display:none;">
             <h2 class="holo-header">SCAM SCANNER</h2>
             <div style="display: flex; gap: 10px;">
                 <input type="text" id="link-input" placeholder="PASTE URL..." 
@@ -117,43 +114,50 @@
     </div>
 
     <div id="hud-dock">
-        <div class="icon active" onclick="toggleView('brief', this)">🛡️</div>
-        <div class="icon" onclick="toggleView('scanner', this)">⚠️</div>
+        <div class="icon active" id="btn-brief" onclick="toggleView('brief', this)">🛡️</div>
+        <div class="icon" id="btn-scanner" onclick="toggleView('scanner', this)">⚠️</div>
     </div>
 </div>
 
 <script>
     function initAres() {
-        // Hide Gate
+        // 1. Hide Gate
         document.getElementById('entry-gate').style.display = 'none';
         
-        // Show Terminal
-        const terminal = document.getElementById('main-terminal');
-        terminal.style.display = 'block';
+        // 2. Show Terminal
+        document.getElementById('main-terminal').style.display = 'block';
 
-        // Trigger Video
+        // 3. Forced Video Play (Unmuted)
         const vid = document.getElementById('bg-video');
-        vid.play();
+        vid.muted = false; 
+        vid.play().catch(e => console.log("Video requires manual trigger:", e));
 
-        // Trigger Unmuted Audio (Direct user gesture bypass)
+        // 4. Inject Music via Dutchman Logic (Embed Mode)
         document.getElementById('audio-engine').innerHTML = `
-            <iframe width="0" height="0" 
+            <iframe width="1" height="1" 
             src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
             frameborder="0" allow="autoplay"></iframe>
         `;
     }
 
-    // Hive Counter Logic
+    // Live Hive Counter
     setInterval(() => {
         const count = 1204812 + Math.floor(Math.random() * 40 - 20);
         document.getElementById('node-count').innerText = count.toLocaleString();
     }, 2000);
 
-    // UI Toggle
+    // Toggle Logic (Clean switch between windows)
     function toggleView(id, btn) {
-        const win = document.getElementById('win-' + id);
-        win.style.display = (win.style.display === 'none') ? 'block' : 'none';
-        btn.classList.toggle('active');
+        // Hide all windows
+        document.getElementById('win-brief').style.display = 'none';
+        document.getElementById('win-scanner').style.display = 'none';
+        
+        // Remove active class from all icons
+        document.querySelectorAll('.icon').forEach(i => i.classList.remove('active'));
+
+        // Show selected and set active
+        document.getElementById('win-' + id).style.display = 'block';
+        btn.classList.add('active');
     }
 
     // Scan Logic
