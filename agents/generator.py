@@ -44,3 +44,38 @@ def run_agent():
 
 # Example: Generate an agent for your main site
 # create_agent("Olympus_Main", "/var/log/nginx/access.log", 0.8)
+def bake_ai_agent(target_site, log_path):
+    """Bakes a fully autonomous AI Security Agent."""
+    agent_template = f"""
+import time
+from common.intelligence import ask_ares_brain
+from phalanx.void import BlackHoleIP
+from common.guardrail import is_friendly
+
+def stand_guard():
+    print("ARES AGENT: Standing guard over {target_site}...")
+    with open('{log_path}', 'r') as log:
+        log.seek(0, 2)
+        while True:
+            line = log.readline()
+            if not line:
+                time.sleep(0.5)
+                continue
+            
+            # 1. Quick Guardrail Check
+            ip = line.split()[0] # Standard Nginx/Apache format
+            if is_friendly(ip): continue
+
+            # 2. AI Reasoning
+            if ask_ares_brain(line):
+                print(f"ARES: AI Verdict - VOID for {{ip}}")
+                BlackHoleIP(ip)
+                # 3. Report to Hub (Future step)
+
+if __name__ == '__main__':
+    stand_guard()
+"""
+    with open(f"agents/minion_{target_site}.py", "w") as f:
+        f.write(agent_template)
+    print(f"ARES: AI Agent for {target_site} is ready for deployment.")
+    
