@@ -3,65 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>ARES | Terminal</title>
+    <title>ARES | Hunter Terminal</title>
     <style>
-        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.6); }
+        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.7); }
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
-        /* ENTRY GATE - The Trigger */
+        /* --- STAGE 1: GATE --- */
         #entry-gate {
             position: fixed; inset: 0; z-index: 9999; background: #000;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .gate-btn {
-            padding: 20px 40px; border: 1px solid var(--ares-red); border-radius: 4px;
-            color: var(--ares-red); letter-spacing: 10px; font-size: 1rem;
-            text-shadow: 0 0 10px var(--ares-red); animation: breathe 3s infinite;
+            padding: 20px 40px; border: 2px solid var(--ares-red);
+            color: var(--ares-red); letter-spacing: 12px; font-weight: bold;
+            text-shadow: 0 0 15px var(--ares-red); animation: pulse 2s infinite;
         }
 
-        /* TERMINAL STAGE */
+        /* --- STAGE 2: TERMINAL --- */
         #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
-        
-        /* The Video Logic */
+
+        /* Video Background */
         .full-vid { 
             position: absolute; width: 100vw; height: 100vh; 
             top: 0; left: 0; object-fit: cover; z-index: 5; opacity: 0.4;
         }
 
-        /* 1mm Floating Shell */
-        #terminal-shell {
-            position: relative; z-index: 100; padding: 25px;
-            height: calc(100vh - 100px); overflow-y: auto;
-        }
-
-        .holo-window {
-            background: var(--glass); border: 1px solid rgba(255,0,0,0.3);
-            border-radius: 4px; backdrop-filter: blur(15px);
-            padding: 25px; margin-bottom: 20px;
-        }
-
-        #hud-dock {
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 30px; z-index: 1000;
-            background: rgba(0,0,0,0.8); padding: 12px 35px; border-radius: 50px;
-            border: 1px solid var(--ares-red);
-        }
-
-        .icon {
-            width: 50px; height: 50px; border: 1px solid var(--ares-red);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--ares-red); font-size: 1.3rem;
-        }
-        .icon.active { background: var(--ares-red); color: #000; box-shadow: 0 0 15px var(--ares-red); }
-
+        /* Hive Counter (Top Right) */
         #hive-pop {
             position: fixed; top: 20px; right: 20px; z-index: 2000;
             text-align: right; color: var(--ares-red); font-weight: bold;
-            background: var(--glass); padding: 10px; border-left: 3px solid var(--ares-red);
+            background: var(--glass); padding: 10px 20px; border-right: 4px solid var(--ares-red);
         }
 
-        @keyframes breathe { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        /* Hunter Log (Bottom Left - NEW!) */
+        #hunter-log {
+            position: fixed; bottom: 100px; left: 20px; width: 300px; height: 150px;
+            z-index: 2000; overflow: hidden; font-size: 0.7rem; color: rgba(255, 0, 0, 0.7);
+            background: linear-gradient(to bottom, transparent, #000);
+            pointer-events: none; display: flex; flex-direction: column-reverse;
+        }
+        .log-entry { margin-bottom: 4px; text-shadow: 0 0 5px var(--ares-red); }
+
+        /* Center Content */
+        #terminal-shell {
+            position: relative; z-index: 100; padding: 20px;
+            height: calc(100vh - 100px); overflow-y: auto; display: flex; justify-content: center;
+        }
+
+        .holo-window {
+            background: var(--glass); border: 1px solid var(--ares-red);
+            width: 100%; max-width: 600px; padding: 30px; margin-top: 50px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.1); backdrop-filter: blur(10px);
+        }
+
+        /* Dock */
+        #hud-dock {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 20px; z-index: 1000;
+            background: rgba(0,0,0,0.9); padding: 15px 40px; border-radius: 50px;
+            border: 1px solid var(--ares-red);
+        }
+        .icon {
+            width: 50px; height: 50px; border: 1px solid var(--ares-red);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--ares-red); transition: 0.2s;
+        }
+        .icon.active, .icon:hover { background: var(--ares-red); color: #000; box-shadow: 0 0 20px var(--ares-red); }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -78,20 +88,23 @@
     <div id="audio-engine"></div>
 
     <div id="hive-pop">
-        <div style="font-size: 0.6rem; opacity: 0.6;">ACTIVE NODES</div>
+        <div style="font-size: 0.6rem; opacity: 0.7;">ACTIVE NODES</div>
         <span id="nodes">1,204,812</span>
     </div>
 
+    <div id="hunter-log">
+        </div>
+
     <div id="terminal-shell">
         <div id="win-brief" class="holo-window">
-            <h2 style="color:var(--ares-red); letter-spacing: 3px; margin-bottom: 10px;">MISSION BRIEF</h2>
-            <p style="font-style: italic; opacity: 0.8;">"Architecting an impenetrable global hive-mind to neutralize digital incursions."</p>
+            <h2 style="color:var(--ares-red); letter-spacing: 4px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px; margin-bottom: 20px;">MISSION BRIEF</h2>
+            <p style="line-height: 1.6; opacity: 0.9;">"ARES transforms the global network into a weaponized defense grid. We do not wait for the breach; we hunt the signal."</p>
         </div>
 
         <div id="win-scan" class="holo-window" style="display:none;">
-            <h2 style="color:var(--ares-red); letter-spacing: 3px; margin-bottom: 10px;">INTEL SCANNER</h2>
-            <input type="text" id="scan-in" placeholder="URL..." style="width:70%; padding:12px; background:#000; border:1px solid var(--ares-red); color:#fff; outline:none;">
-            <button onclick="runScan()" style="padding:12px 20px; background:var(--ares-red); color:#000; border:none; font-weight:bold; cursor:pointer;">SCAN</button>
+            <h2 style="color:var(--ares-red); letter-spacing: 4px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px; margin-bottom: 20px;">THREAT SCANNER</h2>
+            <input type="text" id="scan-in" placeholder="ENTER URL SIGNATURE..." style="width:100%; padding:15px; background:rgba(0,0,0,0.5); border:1px solid var(--ares-red); color:#fff; font-family:inherit; outline:none; margin-bottom: 15px;">
+            <button onclick="runScan()" style="width: 100%; padding:15px; background:var(--ares-red); color:#000; border:none; font-weight:bold; cursor:pointer; letter-spacing: 2px;">INITIATE SCAN</button>
         </div>
     </div>
 
@@ -103,22 +116,22 @@
 
 <script>
     function initTerminal() {
-        // Switch Stages
         document.getElementById('entry-gate').style.display = 'none';
         document.getElementById('main-terminal').style.display = 'block';
 
-        // 1. Force Video (Unmute after play starts)
+        // 1. Force Video
         const v = document.getElementById('bg-video');
-        v.play().then(() => {
-            v.muted = false;
-        });
+        v.play().then(() => { v.muted = false; });
 
-        // 2. Force Audio Engine (Dutchman Logic)
+        // 2. Force Audio (Dutchman Method)
         document.getElementById('audio-engine').innerHTML = `
-            <iframe width="0" height="0" 
+            <iframe width="1" height="1" 
             src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
             frameborder="0" allow="autoplay"></iframe>
         `;
+
+        // 3. Start the Hunter Log
+        setInterval(updateLog, 800);
     }
 
     function showTab(tab) {
@@ -126,7 +139,6 @@
         document.getElementById('win-scan').style.display = 'none';
         document.getElementById('ic-brief').classList.remove('active');
         document.getElementById('ic-scan').classList.remove('active');
-
         document.getElementById('win-' + tab).style.display = 'block';
         document.getElementById('ic-' + tab).classList.add('active');
     }
@@ -136,7 +148,24 @@
         if(url) window.open('https://www.google.com/search?q=scam+report+' + encodeURIComponent(url), '_blank');
     }
 
-    // Hive Pulse
+    // --- HUNTER LOG LOGIC ---
+    const actions = ["BLOCKING", "INTERCEPTING", "TRACING", "PINGING", "FLUSHING"];
+    const targets = ["IP", "PORT", "NODE", "PACKET", "DNS"];
+    
+    function updateLog() {
+        const logBox = document.getElementById('hunter-log');
+        const act = actions[Math.floor(Math.random() * actions.length)];
+        const tgt = targets[Math.floor(Math.random() * targets.length)];
+        const num = Math.floor(Math.random() * 255) + "." + Math.floor(Math.random() * 255);
+        
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = `> ${act} ${tgt}: ${num} [SECURE]`;
+        
+        logBox.prepend(div);
+        if(logBox.children.length > 8) logBox.lastChild.remove();
+    }
+
     setInterval(() => {
         document.getElementById('nodes').innerText = (1204812 + Math.floor(Math.random()*60)).toLocaleString();
     }, 2000);
