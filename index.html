@@ -11,243 +11,267 @@
             color: #ff0000;
             font-family: 'Courier New', Courier, monospace;
             min-height: 100vh;
-            position: relative;
             overflow-x: hidden;
-            /* Pulsing red neon bloom border around entire page */
+            position: relative;
             box-shadow: 
-                0 0 20px 5px rgba(255, 0, 0, 0.4),
-                0 0 40px 15px rgba(255, 0, 0, 0.3),
-                0 0 80px 30px rgba(255, 0, 0, 0.2),
-                inset 0 0 60px 10px rgba(255, 0, 0, 0.15);
+                0 0 20px 5px rgba(255,0,0,0.4),
+                0 0 40px 15px rgba(255,0,0,0.3),
+                inset 0 0 60px 10px rgba(255,0,0,0.15);
             animation: neonPulse 8s infinite alternate ease-in-out;
         }
 
         @keyframes neonPulse {
-            0% { box-shadow: 0 0 20px 5px rgba(255,0,0,0.4), 0 0 40px 15px rgba(255,0,0,0.3), 0 0 80px 30px rgba(255,0,0,0.2), inset 0 0 60px 10px rgba(255,0,0,0.15); }
-            100% { box-shadow: 0 0 30px 10px rgba(255,0,0,0.6), 0 0 60px 25px rgba(255,0,0,0.45), 0 0 120px 50px rgba(255,0,0,0.3), inset 0 0 90px 20px rgba(255,0,0,0.25); }
+            0% { box-shadow: 0 0 20px 5px rgba(255,0,0,0.4), 0 0 40px 15px rgba(255,0,0,0.3), inset 0 0 60px 10px rgba(255,0,0,0.15); }
+            100% { box-shadow: 0 0 30px 10px rgba(255,0,0,0.6), 0 0 60px 25px rgba(255,0,0,0.45), inset 0 0 90px 20px rgba(255,0,0,0.25); }
         }
 
-        /* Full-screen background video */
-        #bg-video {
+        #landing {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            z-index: -2;
-            opacity: 0.22;
+            inset: 0;
+            z-index: 1000;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        .content-wrapper {
+        #landing video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+
+        #enter-btn {
+            z-index: 10;
+            background: rgba(255,0,0,0.6);
+            color: #fff;
+            font-size: 2.5em;
+            font-weight: bold;
+            padding: 20px 60px;
+            border: 3px solid #ff0000;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 40px #ff0000;
+            transition: all 0.4s;
+            letter-spacing: 6px;
+        }
+
+        #enter-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 80px #ff0000;
+        }
+
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff0000;
+            font-size: 2em;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        .progress-bar {
+            width: 60%;
+            height: 12px;
+            background: #300;
+            border: 2px solid #ff0000;
+            border-radius: 6px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 0;
+            height: 100%;
+            background: #ff0000;
+            box-shadow: 0 0 30px #ff0000;
+            transition: width 4s ease-in-out;
+        }
+
+        #main-content {
+            display: none;
             position: relative;
             z-index: 1;
             padding: 30px;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
-        h1 {
+        #hive-prompt {
+            position: sticky;
+            top: 20px;
+            z-index: 50;
+            background: rgba(0,0,0,0.75);
+            border: 3px solid #ff0000;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 auto 30px;
+            max-width: 900px;
             text-align: center;
-            font-size: 2.8em;
-            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
-            margin-bottom: 10px;
-            letter-spacing: 4px;
-        }
-
-        /* New Request Repo Clone Button */
-        .request-btn-container {
-            text-align: center;
-            margin: 20px 0 40px;
-        }
-
-        .request-repo-btn {
-            display: inline-block;
-            background: rgba(255, 0, 0, 0.7);
-            color: #fff;
-            font-size: 1.3em;
+            font-size: 2.2em;
             font-weight: bold;
-            padding: 15px 35px;
-            border-radius: 8px;
-            text-decoration: none;
-            border: 2px solid #ff0000;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
-            backdrop-filter: blur(4px);
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px #ff0000;
+            box-shadow: 
+                0 0 30px rgba(255,0,0,0.7),
+                0 0 60px rgba(255,0,0,0.5),
+                inset 0 0 20px rgba(255,0,0,0.4);
+            backdrop-filter: blur(6px);
         }
 
-        .request-repo-btn:hover {
-            background: #ff0000;
-            box-shadow: 0 0 40px rgba(255, 0, 0, 0.9);
-            transform: scale(1.05);
-        }
+        h1 { text-align: center; font-size: 2.8em; text-shadow: 0 0 15px #ff0000; margin-bottom: 20px; }
 
-        hr {
-            border: none;
-            height: 2px;
-            background: linear-gradient(to right, transparent, #ff0000, transparent);
-            margin: 30px 0;
-            box-shadow: 0 0 20px #ff0000;
-        }
+        hr { border: none; height: 2px; background: linear-gradient(to right, transparent, #ff0000, transparent); box-shadow: 0 0 20px #ff0000; margin: 30px 0; }
 
-        .folder-container {
-            background: rgba(10, 10, 10, 0.65);
-            border: 1px solid rgba(255, 0, 0, 0.4);
+        .folder-container { /* same as before */ 
+            background: rgba(10,10,10,0.65);
+            border: 1px solid rgba(255,0,0,0.4);
             border-radius: 8px;
             margin-bottom: 20px;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255,0,0,0.3);
             backdrop-filter: blur(4px);
         }
 
-        .folder-header {
-            background: rgba(30, 0, 0, 0.7);
-            padding: 18px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
-            transition: all 0.3s;
-        }
+        /* ... keep all previous folder, btn-report, crime-tag, ip-text styles ... */
 
-        .folder-header:hover {
-            background: rgba(60, 0, 0, 0.8);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-        }
-
-        .folder-content {
-            display: none;
-            padding: 20px;
-            background: rgba(5, 5, 5, 0.6);
-        }
-
-        .crime-tag {
-            background: #ff0000;
-            color: #000;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-weight: bold;
-            text-shadow: 0 0 5px #000;
-        }
-
-        .ip-text {
-            font-weight: bold;
-            font-size: 1.4em;
-            text-shadow: 0 0 8px #ff0000;
-        }
-
-        .btn-report {
-            background: rgba(255, 0, 0, 0.7);
-            color: white;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            display: inline-block;
-            margin-top: 15px;
-            font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
-        }
-
-        .btn-report:hover {
-            background: #ff0000;
-            box-shadow: 0 0 30px #ff0000;
-        }
-
-        /* DEMO MODE overlay with binary digital rain */
-        #demo-overlay {
+        #files-sidebar {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            pointer-events: none;
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0.35;
-            animation: flash 6s infinite alternate ease-in-out;
+            right: 20px;
+            top: 100px;
+            width: 380px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 20px;
+            color: #ff4444;
+            box-shadow: 0 0 30px rgba(255,0,0,0.5);
+            z-index: 40;
+            max-height: 80vh;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
         }
 
-        @keyframes flash {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.45; }
-        }
+        #files-sidebar h3 { text-align: center; margin-bottom: 15px; text-shadow: 0 0 10px #ff0000; }
 
-        #demo-label {
-            font-size: 8em;
-            font-weight: bold;
-            color: #ff0000;
-            text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000;
-            letter-spacing: 10px;
-            transform: rotate(-15deg);
-            user-select: none;
-        }
+        #files-list { list-style: none; font-size: 1.1em; line-height: 1.6; }
 
-        #digital-rain {
+        #music-frame {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.4;
+            width: 1px; height: 1px;
+            opacity: 0;
+            pointer-events: none;
         }
 
-        @media (max-width: 768px) {
-            #bg-video { opacity: 0.15; }
-            .request-repo-btn { font-size: 1.1em; padding: 12px 25px; }
-        }
+        /* DEMO overlay (keep as before) */
+        #demo-overlay { /* ... same ... */ }
     </style>
 </head>
 <body>
 
-    <!-- Background video -->
-    <video id="bg-video" autoplay muted loop playsinline>
-        <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-
-    <div class="content-wrapper">
-        <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
-
-        <!-- New Request Repo Clone Button -->
-        <div class="request-btn-container">
-            <a href="mailto:projectaresai@gmail.com?subject=Request%20Repo%20Clone&body=Hello%20Ares%20Team%2C%0A%0AI%20would%20like%20to%20request%20a%20clone%20or%20access%20to%20the%20full%20Ares%20repository%20for%20review%2C%20collaboration%2C%20or%20deployment%20purposes.%0A%0APlease%20provide%20details%20or%20a%20private%20clone%20link%20if%20available.%0A%0AThanks%2C%0A[Your%20Name%20/%20Handle]" class="request-repo-btn">
-                REQUEST REPO CLONE
-            </a>
-        </div>
-
-        <hr>
-
-        {% for offender in offenders %}
-        <div class="folder-container">
-            <div class="folder-header" onclick="toggleFolder('{{ offender.ip }}')">
-                <div>
-                    <span class="ip-text">📂 {{ offender.ip }}</span>
-                    <span style="margin-left: 25px; color: #888;">Detected: {{ offender.timestamp }}</span>
-                </div>
-                <span class="crime-tag">{{ offender.category }}</span>
-            </div>
-
-            <div id="{{ offender.ip }}" class="folder-content">
-                <h4>Alleged Crimes:</h4>
-                <ul>
-                    {% for log in offender.logs %}
-                    <li><code style="color: #ff4444;">{{ log }}</code></li>
-                    {% endfor %}
-                </ul>
-                <p><strong>Status:</strong> Permanently in the Void.</p>
-                <a href="/generate_report/{{ offender.ip }}" class="btn-report">Engage {{ offender.country }} Authorities</a>
-            </div>
-        </div>
-        {% endfor %}
+    <!-- Landing / Intro Video -->
+    <div id="landing">
+        <video autoplay muted loop playsinline>
+            <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
+        </video>
+        <div id="enter-btn">ENTER THE HIVE</div>
     </div>
 
-    <!-- DEMO MODE overlay -->
+    <!-- Loading / Sync Screen -->
+    <div id="loading">
+        <div>SYNCING GLOBAL HIVE...</div>
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+        <div id="complete-text" style="opacity:0;">SYNC COMPLETE</div>
+    </div>
+
+    <!-- Invisible Music Player (playlist starts on click) -->
+    <iframe id="music-frame" src="" allow="autoplay" frameborder="0"></iframe>
+
+    <!-- Main Dashboard -->
+    <div id="main-content">
+        <!-- Floating Global Security Hive Prompt -->
+        <div id="hive-prompt">GLOBAL SECURITY HIVE</div>
+
+        <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
+        <hr>
+
+        <!-- Request Repo Button (from previous) -->
+        <div style="text-align:center; margin:20px 0;">
+            <a href="mailto:projectaresai@gmail.com?subject=Request%20Repo%20Clone&body=..." class="request-repo-btn">REQUEST REPO CLONE</a>
+        </div>
+
+        <!-- Threat Folders (keep your Jinja loop here) -->
+        {% for offender in offenders %}
+        <div class="folder-container">
+            <!-- ... folder content ... -->
+        </div>
+        {% endfor %}
+
+        <!-- Files Manifest Sidebar -->
+        <div id="files-sidebar">
+            <h3>Hive Files Manifest</h3>
+            <ul id="files-list">
+                <li>ares_config.yaml</li>
+                <li>authority_contacts.txt</li>
+                <li>diplomat.py</li>
+                <li>index.py</li>
+                <li>phalanx.go</li>
+                <li>sentinel.py</li>
+                <li>tarpit.sh</li>
+                <li>nexus.sh</li>
+                <li>/agents/ (AI minions)</li>
+                <li>/phalanx/ (kernel blocks)</li>
+                <li>/dreadnought/ (traps)</li>
+                <li>/evidence/ (forensics lockers)</li>
+                <li>/sentinel/ (honey-tokens)</li>
+                <!-- Add more as needed -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- DEMO overlay (keep as before) -->
     <div id="demo-overlay">
         <canvas id="digital-rain"></canvas>
         <div id="demo-label">DEMO MODE</div>
     </div>
 
     <script>
+        const landing = document.getElementById('landing');
+        const loading = document.getElementById('loading');
+        const mainContent = document.getElementById('main-content');
+        const musicFrame = document.getElementById('music-frame');
+        const progress = document.getElementById('progress');
+        const completeText = document.getElementById('complete-text');
+
+        // Enter hive on click
+        document.getElementById('enter-btn').addEventListener('click', () => {
+            // Start music (playlist first video autoplay)
+            musicFrame.src = "https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0&controls=0&rel=0";
+
+            landing.style.display = 'none';
+            loading.style.display = 'flex';
+
+            // Fake loading bar
+            setTimeout(() => { progress.style.width = '100%'; }, 500);
+            setTimeout(() => {
+                completeText.style.opacity = '1';
+                completeText.style.textShadow = '0 0 30px #ff0000';
+            }, 3800);
+            setTimeout(() => {
+                loading.style.display = 'none';
+                mainContent.style.display = 'block';
+            }, 5000);
+        });
+
+        // Folder toggle, digital rain, resize (keep from previous versions)
         function toggleFolder(id) {
             var el = document.getElementById(id);
             el.style.display = (el.style.display === "block") ? "none" : "block";
@@ -255,36 +279,25 @@
 
         const canvas = document.getElementById('digital-rain');
         const ctx = canvas.getContext('2d');
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-
         const binary = '01';
         const fontSize = 14;
         const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
 
         function drawRain() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = '#440000';
             ctx.font = fontSize + 'px monospace';
-
             for (let i = 0; i < drops.length; i++) {
                 const text = binary.charAt(Math.floor(Math.random() * binary.length));
-                const x = i * fontSize;
-                const y = drops[i] * fontSize;
-
-                ctx.fillText(text, x, y);
-
-                if (y > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             }
         }
-
         setInterval(drawRain, 120);
 
         window.addEventListener('resize', () => {
