@@ -279,6 +279,7 @@
 
   <div id="audio-mount"></div>
 
+  <!-- Status Bar -->
   <div id="status-bar">
     <div class="status-left">HIVE STATUS • LIVE</div>
     
@@ -343,7 +344,8 @@ function onYouTubeIframeAPIReady() {
       disablekb: 1,
       fs: 0,
       rel: 0,
-      modestbranding: 1
+      modestbranding: 1,
+      mute: 1               // Start muted (policy compliant)
     },
     events: {
       'onReady':       onPlayerReady,
@@ -397,6 +399,8 @@ function togglePlaylist() {
     player.pauseVideo();
   } else {
     player.playVideo();
+    // Optional: user can unmute manually via YouTube player if they want
+    // player.unMute();  // Uncomment only if you add a separate unmute button
   }
 }
 
@@ -419,22 +423,38 @@ function addLogLine() {
   if (log.children.length > 12) log.removeChild(log.lastChild);
 }
 
-// ── Scanner action ────────────────────────────────────
+// ── Scanner with staged animation ────────────────────
 function runScan() {
   const url = document.getElementById('scan-url').value.trim();
   if (!url) return;
 
   const result = document.getElementById('scan-result');
-  result.textContent = "[ QUERYING HIVE BLACKLIST... ]";
+
+  const steps = [
+    "INITIALIZING HIVE QUERY...",
+    "DECRYPTING PACKET HEADERS...",
+    "CROSS-REFERENCING BLACKLISTS...",
+    "ANALYZING SIGNATURE DRIFT..."
+  ];
+
+  let i = 0;
+  const interval = setInterval(() => {
+    result.textContent = `[ ${steps[i]} ]`;
+    i++;
+    if (i >= steps.length) {
+      clearInterval(interval);
+      finalizeScan(url, result);
+    }
+  }, 600);
+}
+
+function finalizeScan(url, result) {
+  result.innerHTML = `<span style="color:var(--ares-red)">[ THREAT DETECTED: REDIRECTING TO INTEL ]</span>`;
 
   setTimeout(() => {
-    result.innerHTML = `<span style="color:var(--ares-red)">[ SUSPICIOUS SIGNATURE MATCH ]</span>`;
     window.open(`https://www.google.com/search?q=${encodeURIComponent(url)}+scam+report+virustotal+urlvoid`, '_blank');
-
-    setTimeout(() => {
-      result.textContent = "[ READY ]";
-    }, 4800);
-  }, 1600);
+    result.textContent = "[ SCAN COMPLETE: SYSTEM READY ]";
+  }, 1200);
 }
 
 // ── Node counter simulation ───────────────────────────
