@@ -1,368 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ARES • Global Security Hive • v0.2-demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARES | Global Security Hive</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #000;
+            color: #ff0000;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
 
-  <style>
-    :root {
-      --red-glow: #ff0033;
-      --red-dim: #aa0011;
-      --bg-dark: #0a0a0a;
-      --text-dim: #888;
-      --glass-bg: rgba(20, 0, 0, 0.38);
-      --glass-border: rgba(255, 0, 51, 0.35);
-    }
+        /* --- DOCKET: BACKGROUND VIDEO LOGIC --- */
+        #bg-video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            background: #000;
+            filter: brightness(0.4);
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        /* --- GLASS HOLOFRAMES (Backdrop Filter Logic) --- */
+        .holoframe {
+            background: rgba(255, 0, 0, 0.04);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.1), inset 0 0 10px rgba(255,0,0,0.05);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: all 0.4s ease;
+        }
 
-    body {
-      background: #000;
-      color: var(--red-glow);
-      font-family: 'Courier New', Courier, monospace;
-      height: 100dvh;
-      overflow: hidden;
-      position: relative;
-      image-rendering: crisp-edges;
-    }
+        /* --- DOCKET: FLOATING SPACING RULE (1mm / 4px gap) --- */
+        /* Logic: Dock (80px) + Bottom Offset (15px) + 1mm Gap (4px) = 99px total safety height */
+        #main-content {
+            display: none;
+            padding: 30px;
+            height: calc(100vh - 99px); 
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
 
-    #bg-video {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      filter: brightness(0.42) contrast(1.08) saturate(1.15);
-      pointer-events: none;
-    }
+        /* --- HIVE POPULATION (TOP RIGHT) --- */
+        #hive-population {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 25px;
+            z-index: 2001;
+            text-align: right;
+            border-left: 4px solid #ff0000;
+        }
 
-    #landing, #loading {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+        /* --- LANDING & LOADING --- */
+        #landing {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    #enter-btn {
-      background: rgba(255,0,51,0.14);
-      color: white;
-      font-size: clamp(1.8rem, 6vw, 3.2rem);
-      font-weight: bold;
-      padding: 1.2rem 3.8rem;
-      border: 2px solid var(--red-glow);
-      border-radius: 10px;
-      cursor: pointer;
-      letter-spacing: 0.8rem;
-      text-shadow: 0 0 18px black;
-      box-shadow: 0 0 60px rgba(255,0,51,0.45);
-      transition: all 0.4s ease;
-    }
+        #enter-btn {
+            background: rgba(255, 0, 0, 0.05);
+            color: #fff;
+            font-size: 2.2em;
+            padding: 25px 60px;
+            border: 2px solid #ff0000;
+            cursor: pointer;
+            letter-spacing: 15px;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
+            transition: 0.4s;
+            text-transform: uppercase;
+        }
 
-    #enter-btn:hover {
-      background: rgba(255,0,51,0.38);
-      box-shadow: 0 0 100px var(--red-glow);
-      transform: scale(1.06);
-    }
+        #enter-btn:hover {
+            background: #ff0000;
+            color: #000;
+            box-shadow: 0 0 80px #ff0000;
+        }
 
-    #loading-text {
-      font-size: 1.6rem;
-      letter-spacing: 0.5rem;
-      margin-bottom: 2.5rem;
-      text-shadow: 0 0 20px var(--red-glow);
-    }
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 2999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .progress-bar {
-      width: 380px;
-      height: 4px;
-      background: #200000;
-      border-radius: 2px;
-      overflow: hidden;
-    }
+        .progress-bar { width: 400px; height: 2px; background: #200; margin-top: 25px; border-radius: 2px; }
+        .progress { width: 0; height: 100%; background: #ff0000; transition: width 3.2s cubic-bezier(0.1, 0, 0.3, 1); }
 
-    .progress {
-      width: 0;
-      height: 100%;
-      background: var(--red-glow);
-      box-shadow: 0 0 30px var(--red-glow);
-      transition: width 3.8s cubic-bezier(0.25, 0.1, 0.25, 1);
-    }
+        /* --- NAVIGATION DOCK --- */
+        #bottom-bar {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            gap: 25px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 40px;
+            border-radius: 60px;
+            border: 1px solid rgba(255,0,0,0.5);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+        }
 
-    #main-content {
-      height: 100dvh;
-      overflow-y: auto;
-      padding: 2rem 2rem 9rem;
-      position: relative;
-      z-index: 10;
-      display: none;
-    }
+        .icon-btn {
+            width: 55px; height: 55px;
+            border: 1px solid rgba(255,0,0,0.4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #ff0000; font-size: 1.5em; transition: 0.3s;
+        }
 
-    .holoframe {
-      background: var(--glass-bg);
-      backdrop-filter: blur(14px) saturate(160%);
-      -webkit-backdrop-filter: blur(14px) saturate(160%);
-      border: 1px solid var(--glass-border);
-      border-radius: 8px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,0,51,0.08);
-      padding: 1.8rem;
-      margin-bottom: 1.8rem;
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
+        .icon-btn.active { background: #ff0000; color: #000; box-shadow: 0 0 25px #ff0000; border-color: #ff0000; }
 
-    .holoframe.hidden {
-      opacity: 0;
-      transform: translateY(40px);
-      pointer-events: none;
-    }
+        /* --- THREAT METER ANIMATIONS --- */
+        #pulse-ring {
+            width: 35px; height: 35px; border-radius: 50%;
+            background: #ffaa00; box-shadow: 0 0 20px #ffaa00;
+            animation: pulse 2s infinite ease-in-out;
+        }
 
-    h2, h3 {
-      margin-bottom: 1rem;
-      letter-spacing: 2px;
-      text-shadow: 0 0 12px rgba(255,0,51,0.6);
-    }
+        .pulse-critical {
+            animation: pulse 0.35s infinite ease-in-out !important;
+            background: #ff0000 !important;
+            box-shadow: 0 0 40px #ff0000 !important;
+        }
 
-    /* Bottom dock */
-    #bottom-dock {
-      position: fixed;
-      bottom: 1.2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      display: flex;
-      gap: 1.6rem;
-      background: rgba(0,0,0,0.75);
-      padding: 0.9rem 2.2rem;
-      border-radius: 3rem;
-      border: 1px solid rgba(255,0,51,0.4);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-    }
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
 
-    .dock-icon {
-      width: 3.6rem;
-      height: 3.6rem;
-      border-radius: 50%;
-      border: 2px solid var(--red-glow);
-      color: var(--red-glow);
-      font-size: 1.5rem;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .dock-icon.active,
-    .dock-icon:hover {
-      background: var(--red-glow);
-      color: black;
-      box-shadow: 0 0 24px var(--red-glow);
-      transform: scale(1.15);
-    }
-
-    /* Node counter */
-    #node-counter {
-      position: fixed;
-      top: 1rem;
-      right: 1.5rem;
-      z-index: 1100;
-      text-align: right;
-      padding: 0.6rem 1.2rem;
-      border-left: 3px solid var(--red-glow);
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
-      border-radius: 0 0 0 12px;
-    }
-
-    /* Threat ring */
-    #threat-ring {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #ffaa00;
-      box-shadow: 0 0 28px #ffaa00;
-      animation: pulse-ring 2.4s infinite ease-in-out;
-    }
-
-    .critical #threat-ring {
-      background: var(--red-glow);
-      box-shadow: 0 0 48px var(--red-glow);
-      animation-duration: 0.6s;
-    }
-
-    @keyframes pulse-ring {
-      0%,100% { transform: scale(0.92); opacity: 0.7; }
-      50%     { transform: scale(1.12); opacity: 1; }
-    }
-
-    @media (max-width: 640px) {
-      #bottom-dock { gap: 1rem; padding: 0.7rem 1.6rem; }
-      .dock-icon { width: 3rem; height: 3rem; font-size: 1.3rem; }
-      #main-content { padding: 1.2rem 1.2rem 7rem; }
-    }
-  </style>
+        /* --- UTILS --- */
+        .critical-text { color: #ff0000 !important; text-shadow: 0 0 15px #ff0000; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
-<video id="bg-video" loop playsinline>
-  <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
-</video>
+    <video id="bg-video" muted loop playsinline>
+        <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
+    </video>
 
-<!-- ── Landing ──────────────────────────────────────── -->
-<div id="landing">
-  <button id="enter-btn">ENTER ARES</button>
-</div>
-
-<!-- ── Loading ──────────────────────────────────────── -->
-<div id="loading">
-  <div id="loading-text">SYNCHRONIZING HIVE MIND</div>
-  <div class="progress-bar">
-    <div class="progress" id="progress"></div>
-  </div>
-</div>
-
-<!-- ── Main Interface ───────────────────────────────── -->
-<div id="main-content">
-
-  <!-- Node counter -->
-  <div id="node-counter">
-    <div style="font-size:0.75rem; color:#666; letter-spacing:1px;">ACTIVE NODES</div>
-    <div id="node-count" style="font-size:1.6rem; font-weight:bold;">1,204,812</div>
-  </div>
-
-  <!-- Mission brief -->
-  <div class="holoframe" id="panel-mission">
-    <h3>STRATEGIC MISSION BRIEF</h3>
-    <p style="line-height:1.65; opacity:0.85; font-size:0.95rem;">
-      To architect an impenetrable global hive-mind that anticipates, intercepts, and neutralizes digital incursions before they breach the perimeter. ARES exists to reclaim the sovereignty of the web — transforming vulnerable endpoints into a unified, self-healing defense grid that renders malicious access obsolete.
-    </p>
-  </div>
-
-  <!-- Threat status -->
-  <div class="holoframe" id="panel-threat">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <div style="font-size:0.8rem; color:#888; letter-spacing:1px; margin-bottom:0.4rem;">NETWORK THREAT STATUS</div>
-        <div id="threat-level" style="font-size:1.9rem; font-weight:bold; color:#ffaa00;">ELEVATED</div>
-      </div>
-      <div id="threat-ring"></div>
+    <div id="hive-population" class="holoframe">
+        <div style="font-size: 0.65em; letter-spacing: 3px; color: rgba(255,255,255,0.6);">ACTIVE HIVE NODES</div>
+        <div id="node-count" style="font-size: 1.5em; font-weight: bold; text-shadow: 0 0 15px #ff0000;">1,204,812</div>
     </div>
-  </div>
 
-  <!-- Link scanner -->
-  <div class="holoframe" id="panel-scanner">
-    <h3>LINK INTEL SCANNER</h3>
-    <div style="display:flex; gap:0.8rem; margin:1rem 0;">
-      <input type="url" id="url-input" placeholder="https://suspicious.example.com" 
-             style="flex:1; background:rgba(0,0,0,0.5); border:1px solid #400; color:white; padding:0.9rem; font-family:inherit; border-radius:4px; outline:none;">
-      <button onclick="scanURL()" 
-              style="background:var(--red-glow); color:black; border:none; padding:0 2rem; font-weight:bold; cursor:pointer; border-radius:4px;">
-        ANALYZE
-      </button>
+    <div id="landing">
+        <button id="enter-btn">ENTER ARES</button>
     </div>
-    <div id="scan-result" style="margin-top:1rem; font-size:0.9rem; min-height:1.5rem; color:#888;">
-      [ READY ]
+
+    <div id="loading">
+        <div style="letter-spacing: 12px; font-size: 1.2em;">SYNCHRONIZING HIVE</div>
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
     </div>
-  </div>
 
-</div>
+    <div id="main-content">
+        <div class="holoframe" style="padding: 30px; border-left: 6px solid #ff0000;">
+            <h3 style="letter-spacing: 5px; margin-bottom: 12px; font-size: 1em; color: #fff;">OPERATIONAL MISSION</h3>
+            <p style="font-style: italic; color: rgba(255,255,255,0.75); line-height: 1.7; font-size: 1em;">
+                "To architect an impenetrable global hive-mind that anticipates, intercepts, and neutralizes digital incursions before they breach the perimeter. ARES exists to reclaim the sovereignty of the web, transforming vulnerable endpoints into a unified, self-healing defense grid that renders malicious access obsolete."
+            </p>
+        </div>
 
-<!-- Bottom navigation dock -->
-<div id="bottom-dock">
-  <div class="dock-icon active" id="btn-mission" title="Mission Core">🛡️</div>
-  <div class="dock-icon" id="btn-threat" title="Threat Status">⚡</div>
-  <div class="dock-icon" id="btn-scanner" title="URL Scanner">🔍</div>
-</div>
+        <div class="holoframe" style="padding: 25px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <div style="font-size: 0.75em; letter-spacing: 3px; color: #888; margin-bottom: 5px;">NETWORK THREAT STATUS</div>
+                <div id="threat-text" style="font-size: 1.8em; font-weight: bold; color: #ffaa00; transition: 0.3s;">ELEVATED</div>
+            </div>
+            <div id="pulse-ring"></div>
+        </div>
 
-<script>
-// ── State ─────────────────────────────────────────────
-let activePanels = new Set(['mission']);
+        <div class="holoframe" style="padding: 30px;">
+            <h3 style="margin-bottom: 18px; font-size: 0.9em; letter-spacing: 4px; color: #fff;">LINK SCAM VERIFICATION</h3>
+            <div style="display: flex; gap: 15px;">
+                <input type="text" id="link-input" placeholder="PASTE SUSPICIOUS URL FOR SCANNING..." 
+                       style="flex-grow: 1; background: rgba(0,0,0,0.6); border: 1px solid #ff0000; color: #fff; padding: 15px; font-family: 'Courier New'; outline: none; font-size: 1em;">
+                <button onclick="checkLink()" style="background: #ff0000; color: #000; border: none; padding: 0 40px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;">SCAN</button>
+            </div>
+            <div id="result-text" style="margin-top: 20px; font-size: 0.9em; color: #888; font-family: monospace;">[ SYSTEM_STATUS: STANDBY ]</div>
+        </div>
+    </div>
 
-// ── Enter ARES ────────────────────────────────────────
-document.getElementById('enter-btn').onclick = () => {
-  document.getElementById('bg-video').play().catch(()=>{});
+    <div id="bottom-bar">
+        <div class="icon-btn active" id="nav-core">🛡️</div>
+        <div class="icon-btn" onclick="alert('Threat Logs: Accessing Secure Nodes...')">⚠️</div>
+        <div class="icon-btn" onclick="alert('Files Manifest: Initializing Secure Repository...')">📁</div>
+    </div>
 
-  // Stranger Things synthwave playlist – unmuted (gesture allows)
-  const audio = document.createElement('div');
-  audio.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" allow="autoplay" frameborder="0" style="position:absolute;opacity:0;"></iframe>`;
-  document.body.appendChild(audio);
+    <script>
+        // --- DOCKET: INVISIBLE AUDIO & VIDEO INITIALIZATION ---
+        function startAresSystems() {
+            const video = document.getElementById('bg-video');
+            video.play();
 
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('loading').style.display = 'flex';
+            // Docket: Invisible YouTube Audio (Unmuted Force Play)
+            const audioVault = document.createElement('div');
+            audioVault.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;";
+            audioVault.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" frameborder="0" allow="autoplay"></iframe>`;
+            document.body.appendChild(audioVault);
 
-  setTimeout(() => document.getElementById('progress').style.width = '100%', 300);
-  setTimeout(() => {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('main-content').style.display = 'block';
-  }, 4200);
-};
+            // Interface Transition
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('loading').style.display = 'flex';
+            
+            setTimeout(() => { document.getElementById('progress').style.width = '100%'; }, 100);
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }, 3500);
+        }
 
-// ── Panel toggling ─────────────────────────────────────
-function togglePanel(panelId, btnId) {
-  const panel = document.getElementById(`panel-${panelId}`);
-  const btn = document.getElementById(`btn-${panelId}`);
+        document.getElementById('enter-btn').addEventListener('click', startAresSystems);
 
-  if (activePanels.has(panelId)) {
-    panel.classList.add('hidden');
-    activePanels.delete(panelId);
-    btn.classList.remove('active');
-  } else {
-    panel.classList.remove('hidden');
-    activePanels.add(panelId);
-    btn.classList.add('active');
-  }
-}
+        // --- HIVE POPULATION LOGIC ---
+        function updateHivePopulation() {
+            const base = 1204812;
+            const jitter = Math.floor(Math.random() * 60) - 30;
+            document.getElementById('node-count').innerText = (base + jitter).toLocaleString();
+        }
+        setInterval(updateHivePopulation, 2500);
 
-document.getElementById('btn-mission').onclick  = () => togglePanel('mission', 'mission');
-document.getElementById('btn-threat').onclick   = () => togglePanel('threat',  'threat');
-document.getElementById('btn-scanner').onclick  = () => togglePanel('scanner','scanner');
+        // --- SCAM SCAN & THREAT ESCALATION ---
+        function checkLink() {
+            const input = document.getElementById('link-input').value;
+            const resText = document.getElementById('result-text');
+            const threatText = document.getElementById('threat-text');
+            const pulse = document.getElementById('pulse-ring');
 
-// ── Fake node counter ──────────────────────────────────
-setInterval(() => {
-  const base = 1204812;
-  const variation = Math.floor(Math.random() * 80) - 40;
-  document.getElementById('node-count').textContent = (base + variation).toLocaleString();
-}, 1800);
+            if(!input) return;
 
-// ── URL scanner simulation ─────────────────────────────
-function scanURL() {
-  const input = document.getElementById('url-input');
-  const result = document.getElementById('scan-result');
-  const level = document.getElementById('threat-level');
-  const ring = document.getElementById('threat-ring');
+            resText.innerHTML = `<span style="color: #ffaa00;">[ UPLINKING TO HIVE... ANALYZING BLACKLISTS ]</span>`;
+            
+            setTimeout(() => {
+                // Escalate to Critical
+                threatText.innerText = "CRITICAL";
+                threatText.classList.add('critical-text');
+                pulse.classList.add('pulse-critical');
+                resText.innerHTML = `<span style="color: #ff0000;">[ WARNING: MALICIOUS SIGNATURE DETECTED - OPENING INTEL ]</span>`;
+                
+                // Secure Intel Query
+                window.open(`https://www.google.com/search?q=scam+report+${encodeURIComponent(input)}`, '_blank');
 
-  const url = input.value.trim();
-  if (!url) return;
+                // Cool down system after search
+                setTimeout(() => {
+                    threatText.innerText = "ELEVATED";
+                    threatText.classList.remove('critical-text');
+                    pulse.classList.remove('pulse-critical');
+                    resText.innerHTML = "[ SYSTEM_STATUS: STANDBY ]";
+                }, 7000);
+            }, 1800);
+        }
 
-  result.textContent = "[ QUERYING HIVE INTELLIGENCE... ]";
-  level.textContent = "SCANNING";
-
-  setTimeout(() => {
-    level.textContent = "CRITICAL";
-    level.style.color = "var(--red-glow)";
-    ring.parentElement.classList.add('critical');
-
-    result.innerHTML = `<span style="color:var(--red-glow)">[ MALICIOUS INDICATORS DETECTED ]</span>`;
-
-    const q = encodeURIComponent(url);
-    window.open(`https://www.google.com/search?q=site:virustotal.com+${q}+OR+site:urlvoid.com+${q}+OR+scam+${q}`, '_blank');
-
-    setTimeout(() => {
-      level.textContent = "ELEVATED";
-      level.style.color = "#ffaa00";
-      ring.parentElement.classList.remove('critical');
-      result.textContent = "[ READY ]";
-    }, 5800);
-  }, 1400);
-}
-</script>
+        // Toggle Main Content
+        document.getElementById('nav-core').addEventListener('click', function() {
+            const content = document.getElementById('main-content');
+            content.style.display = (content.style.display === 'none') ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
