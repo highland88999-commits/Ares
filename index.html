@@ -5,216 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>ARES | Terminal</title>
     <style>
-        :root { --ares-red: #ff0000; --glass: rgba(5, 0, 0, 0.9); --glow: 0 0 15px var(--ares-red); }
-        * { margin:0; padding:0; box-sizing:border-box; cursor: crosshair; }
+        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.6); }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
-        /* --- OVERLAYS --- */
-        #entry-gate {
+        /* --- STAGE 1: ENTRY --- */
+        #gate {
             position: fixed; inset: 0; z-index: 9999; background: #000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .gate-btn {
-            padding: 30px 60px; border: 1px solid var(--ares-red);
-            color: var(--ares-red); letter-spacing: 15px; font-weight: bold;
-            text-shadow: var(--glow); animation: pulse 2s infinite; background: transparent;
+            padding: 20px 40px; border: 1px solid var(--ares-red);
+            color: var(--ares-red); letter-spacing: 10px; font-weight: bold;
+            text-shadow: 0 0 10px var(--ares-red);
         }
-
-        #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
 
         /* --- BACKGROUND VIDEO (MUTED) --- */
+        #main-ui { display: none; }
         #bg-video {
             position: absolute; inset: 0; width: 100%; height: 100%; 
-            object-fit: cover; z-index: 5; filter: brightness(0.3) sepia(1) hue-rotate(-50deg);
+            object-fit: cover; z-index: 1; filter: brightness(0.4);
         }
 
-        /* --- TOP NAV (COMMS CONTROL) --- */
-        #top-bar {
+        /* --- AUDIO ENGINE (INVISIBLE IFRAME) --- */
+        #audio-engine {
+            position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; z-index: 0;
+        }
+
+        /* --- HOLOFRAMES (SEE-THROUGH) --- */
+        .holo-frame {
+            position: absolute; background: var(--glass); 
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            backdrop-filter: blur(10px); padding: 20px; z-index: 10;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Mission Briefing */
+        #frame-mission { top: 80px; left: 30px; width: 400px; }
+        
+        /* Threat Logs */
+        #frame-logs { bottom: 30px; left: 30px; width: 350px; height: 200px; overflow: hidden; }
+        .log-line { font-size: 0.75rem; color: var(--ares-red); margin-bottom: 4px; opacity: 0.8; }
+
+        /* Scam URL Checker */
+        #frame-scanner { top: 80px; right: 30px; width: 350px; }
+        input { width: 100%; padding: 10px; background: rgba(0,0,0,0.7); border: 1px solid var(--ares-red); color: #fff; outline: none; margin-bottom: 10px; }
+        button.action-btn { width: 100%; padding: 10px; background: var(--ares-red); color: #000; border: none; font-weight: bold; cursor: pointer; }
+
+        /* --- TOP NAV (COMMS TOGGLE) --- */
+        #top-nav {
             position: fixed; top: 0; left: 0; width: 100%; padding: 20px 30px;
-            display: flex; justify-content: space-between; align-items: flex-start; z-index: 2000;
+            display: flex; justify-content: space-between; z-index: 100;
         }
-        #hive-info { border-left: 3px solid var(--ares-red); padding-left: 15px; }
-        #comms-toggle {
+        #mute-toggle {
             background: var(--glass); border: 1px solid var(--ares-red);
-            padding: 10px 20px; color: var(--ares-red); font-weight: bold;
-            letter-spacing: 2px; text-shadow: var(--glow); transition: 0.3s;
-        }
-        #comms-toggle.muted { opacity: 0.5; color: white; border-color: white; }
-
-        /* --- HUNTER LOG (BOTTOM LEFT) --- */
-        #hunter-log {
-            position: fixed; bottom: 120px; left: 30px; width: 350px; height: 180px;
-            z-index: 2000; overflow: hidden; font-size: 0.75rem; color: rgba(255, 0, 0, 0.7);
-            display: flex; flex-direction: column-reverse; pointer-events: none;
+            padding: 8px 20px; color: var(--ares-red); font-weight: bold;
+            cursor: pointer; letter-spacing: 2px;
         }
 
-        /* --- CENTER INTERFACE --- */
-        #terminal-shell {
-            position: relative; z-index: 100; padding: 40px;
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-        }
-        .holo-window {
-            background: var(--glass); border: 1px solid rgba(255, 0, 0, 0.2);
-            width: 100%; max-width: 650px; padding: 40px;
-            backdrop-filter: blur(20px); box-shadow: 0 0 50px rgba(0,0,0,1);
-        }
-
-        /* --- HUD DOCK --- */
-        #hud-dock {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 30px; z-index: 1000;
-            background: rgba(0,0,0,0.95); padding: 15px 50px; border-radius: 60px;
-            border: 1px solid var(--ares-red); box-shadow: var(--glow);
-        }
-        .icon {
-            width: 50px; height: 50px; border: 1px solid var(--ares-red);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: var(--ares-red); font-size: 1.2rem; transition: 0.3s;
-        }
-        .icon.active { background: var(--ares-red); color: #000; box-shadow: var(--glow); }
-
-        /* --- SCANNER STYLING --- */
-        input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--ares-red); color: #fff; outline: none; margin-bottom: 15px; }
-        button.action { width: 100%; padding: 15px; background: var(--ares-red); color: #000; border: none; font-weight: bold; letter-spacing: 2px; }
-
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        h2 { color: var(--ares-red); font-size: 1rem; letter-spacing: 3px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,0,0,0.3); padding-bottom: 5px; }
+        p { font-size: 0.9rem; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-<div id="entry-gate">
-    <div style="color:var(--ares-red); margin-bottom: 20px; font-size: 0.8rem; letter-spacing: 5px;">SYSTEM: ENCRYPTED</div>
-    <button class="gate-btn" onclick="igniteAres()">INITIATE ARES</button>
+<div id="gate" onclick="ignite()">
+    <div class="gate-btn">INITIATE</div>
 </div>
 
-<div id="main-terminal">
+<div id="main-ui">
     <video id="bg-video" loop playsinline muted>
         <source src="https://raw.githubusercontent.com/highland88999-commits/Ares/main/assets/No_people..._Ad.mp4" type="video/mp4">
     </video>
 
-    <div id="top-bar">
-        <div id="hive-info">
-            <div style="font-size: 0.6rem; opacity: 0.6; letter-spacing: 2px;">ACTIVE HIVE NODES</div>
-            <div id="nodes" style="color:var(--ares-red); font-weight: bold; font-size: 1.2rem;">1,204,812</div>
-        </div>
-        <button id="comms-toggle" onclick="togglePlaylist()">AUDIO: ON</button>
+    <div id="audio-engine"></div>
+
+    <div id="top-nav">
+        <div style="color:var(--ares-red); font-weight:bold; letter-spacing:5px;">ARES v2.6</div>
+        <button id="mute-toggle" onclick="toggleAudio()">COMMS: LIVE</button>
     </div>
 
-    <div id="audio-engine" style="position: absolute; top: -1000px;">
-        <div id="yt-player"></div>
+    <div id="frame-mission" class="holo-frame">
+        <h2>MISSION PROFILE</h2>
+        <p>ARES is a decentralized defense grid designed to neutralize digital incursions. Our mission is the total fortification of user data through predictive threat modeling and active signal interception.</p>
     </div>
 
-    <div id="hunter-log"></div>
-
-    <div id="terminal-shell">
-        <div id="win-brief" class="holo-window">
-            <h2 style="color:var(--ares-red); letter-spacing: 5px; margin-bottom: 20px;">MISSION BRIEF</h2>
-            <p style="line-height: 1.8; opacity: 0.8;">"Global security isn't a state of being—it's an active hunt. ARES intercepts threats at the edge of the network. Comms established."</p>
-        </div>
-
-        <div id="win-scan" class="holo-window" style="display:none;">
-            <h2 style="color:var(--ares-red); letter-spacing: 5px; margin-bottom: 20px;">THREAT SCANNER</h2>
-            <input type="text" id="scan-in" placeholder="SIGNATURE URL...">
-            <button class="action" onclick="runScan()">EXECUTE SCAN</button>
-        </div>
+    <div id="frame-scanner" class="holo-frame">
+        <h2>SCAM DETECTOR</h2>
+        <input type="text" id="scan-input" placeholder="INPUT URL SIGNATURE...">
+        <button class="action-btn" onclick="runScan()">ANALYZE PACKETS</button>
     </div>
 
-    <div id="hud-dock">
-        <div class="icon active" id="ic-brief" onclick="showTab('brief')">🛡️</div>
-        <div class="icon" id="ic-scan" onclick="showTab('scan')">⚠️</div>
+    <div id="frame-logs" class="holo-frame">
+        <h2>THREAT LOGS</h2>
+        <div id="log-container"></div>
     </div>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
-
 <script>
-    let player;
-    let isMuted = false;
+    let audioActive = true;
 
-    // 1. Setup the YouTube Player via API
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('yt-player', {
-            height: '1',
-            width: '1',
-            videoId: '', // Handled by list
-            playerVars: {
-                'listType': 'playlist',
-                'list': 'PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV',
-                'autoplay': 0,
-                'controls': 0,
-                'disablekb': 1
-            },
-            events: {
-                'onReady': () => console.log("ARES Comms Prepared.")
-            }
-        });
+    function ignite() {
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'block';
+
+        // Start Video
+        document.getElementById('bg-video').play();
+
+        // Inject Invisible Audio Iframe (Playlist)
+        const engine = document.getElementById('audio-engine');
+        engine.innerHTML = `
+            <iframe id="radio-pipe" width="1" height="1" 
+            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
+            allow="autoplay"></iframe>`;
+
+        // Start Log Simulation
+        setInterval(addLog, 1000);
     }
 
-    // 2. Main Entry Function
-    function igniteAres() {
-        document.getElementById('entry-gate').style.display = 'none';
-        document.getElementById('main-terminal').style.display = 'block';
-
-        // Play Muted BG Video
-        const bgVid = document.getElementById('bg-video');
-        bgVid.play();
-
-        // Start Unmuted Music
-        if (player && player.playVideo) {
-            player.unMute();
-            player.playVideo();
-        }
-
-        // Start Log Cycle
-        setInterval(logTick, 800);
-    }
-
-    // 3. Audio Toggle (TOP RIGHT BUTTON)
-    function togglePlaylist() {
-        const btn = document.getElementById('comms-toggle');
-        if (isMuted) {
-            player.unMute();
-            btn.innerHTML = "AUDIO: ON";
-            btn.classList.remove('muted');
-            isMuted = false;
+    function toggleAudio() {
+        const pipe = document.getElementById('audio-engine');
+        const btn = document.getElementById('mute-toggle');
+        
+        if (audioActive) {
+            pipe.innerHTML = ''; // Complete kill for silence
+            btn.innerHTML = "COMMS: MUTED";
+            btn.style.color = "#fff";
+            audioActive = false;
         } else {
-            player.mute();
-            btn.innerHTML = "AUDIO: OFF";
-            btn.classList.add('muted');
-            isMuted = true;
+            // Re-inject unmuted playlist
+            pipe.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" allow="autoplay"></iframe>`;
+            btn.innerHTML = "COMMS: LIVE";
+            btn.style.color = "var(--ares-red)";
+            audioActive = true;
         }
-    }
-
-    // UI Navigation
-    function showTab(t) {
-        document.getElementById('win-brief').style.display = 'none';
-        document.getElementById('win-scan').style.display = 'none';
-        document.getElementById('ic-brief').classList.remove('active');
-        document.getElementById('ic-scan').classList.remove('active');
-        document.getElementById('win-' + t).style.display = 'block';
-        document.getElementById('ic-' + t).classList.add('active');
     }
 
     function runScan() {
-        const val = document.getElementById('scan-in').value;
+        const val = document.getElementById('scan-input').value;
         if(val) window.open('https://www.google.com/search?q=scam+report+' + encodeURIComponent(val), '_blank');
     }
 
-    // Live Hunter Log Logic
-    function logTick() {
-        const log = document.getElementById('hunter-log');
-        const acts = ["BLOCKING", "TRACING", "REROUTING", "SHIELDING"];
+    function addLog() {
+        const container = document.getElementById('log-container');
+        const acts = ["INTRUSION BLOCKED", "IP TRACED", "PACKET DROPPED", "FIREWALL BYPASS PREVENTED"];
         const div = document.createElement('div');
-        div.style.marginBottom = "5px";
-        div.innerHTML = `> ${acts[Math.floor(Math.random()*acts.length)]} PACKET ${Math.floor(Math.random()*999)} [SECURE]`;
-        log.prepend(div);
-        if(log.children.length > 8) log.lastChild.remove();
+        div.className = 'log-line';
+        div.innerHTML = `> ${acts[Math.floor(Math.random()*acts.length)]}: ${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+        container.prepend(div);
+        if(container.children.length > 7) container.lastChild.remove();
     }
-
-    // Hive Counter Pulse
-    setInterval(() => {
-        document.getElementById('nodes').innerText = (1204812 + Math.floor(Math.random()*60)).toLocaleString();
-    }, 2000);
 </script>
 </body>
 </html>
