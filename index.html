@@ -1,211 +1,448 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>ARES | Terminal</title>
-    <style>
-        :root { --red: #ff0000; --glass: rgba(0, 0, 0, 0.7); }
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body, html { 
-            width:100%; height:100%; overflow:hidden; background:#000; 
-            font-family: 'Courier New', monospace; color: white;
-            display: flex; justify-content: center; align-items: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ARES • Global Terminal</title>
 
-        /* --- THE BOUNDARY (Safe Zone) --- */
-        #viewport {
-            position: relative; width: 100vw; height: 100vh;
-            max-width: 1400px; max-height: 900px; /* Hard Limit */
-            display: flex; flex-direction: column; overflow: hidden;
-            border: 1px solid rgba(255, 0, 0, 0.15);
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
+  <style>
+    :root {
+      --ares-red:     #ff0033;
+      --ares-dim:     #aa0011;
+      --glass-bg:     rgba(8, 0, 0, 0.78);
+      --glass-border: rgba(255, 0, 51, 0.38);
+      --text-dim:     #777;
+    }
 
-        /* --- GATE --- */
-        #gate { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .gate-btn { padding: 20px 40px; border: 1px solid var(--red); color: var(--red); letter-spacing: 10px; font-weight: bold; background: transparent; text-shadow: 0 0 10px var(--red); }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* --- MAIN UI --- */
-        #interface { display: none; width: 100%; height: 100%; position: relative; }
-        
-        #bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; filter: brightness(0.4); }
-        
-        #pulse {
-            position: absolute; inset: 0; z-index: 2;
-            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.95) 100%);
-            animation: breathe 8s ease-in-out infinite; pointer-events: none;
-        }
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Courier New', Courier, monospace;
+      color: white;
+      touch-action: manipulation;
+    }
 
-        /* --- AUDIO ENGINE (Must be Opacity 0, NOT Hidden) --- */
-        #audio-mount {
-            position: absolute; top: 0; left: 0; width: 1px; height: 1px;
-            opacity: 0; pointer-events: none; z-index: 0;
-        }
+    #gate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        /* --- CONTROLS --- */
-        #play-btn {
-            position: absolute; top: 30px; right: 30px; z-index: 100;
-            background: var(--glass); border: 1px solid var(--red);
-            padding: 12px 24px; color: var(--red); font-weight: bold; cursor: pointer;
-            letter-spacing: 2px; font-size: 0.8rem;
-        }
+    #gate-btn {
+      padding: 1.4rem 3.8rem;
+      font-size: clamp(1.3rem, 7vw, 2.6rem);
+      font-weight: bold;
+      letter-spacing: 0.9rem;
+      color: var(--ares-red);
+      border: 2px solid var(--ares-red);
+      background: transparent;
+      text-shadow: 0 0 16px rgba(255,0,51,0.7);
+      box-shadow: 0 0 60px rgba(255,0,51,0.35);
+      cursor: pointer;
+      transition: all 0.35s ease;
+      animation: gatePulse 4s infinite ease-in-out;
+    }
 
-        /* --- FRAMES --- */
-        .frame {
-            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
-            width: 90%; max-width: 500px; background: var(--glass);
-            border: 1px solid rgba(255, 0, 0, 0.3); backdrop-filter: blur(12px);
-            padding: 30px; display: none; z-index: 50;
-        }
-        .frame.active { display: block; animation: fadeUp 0.3s ease-out; }
+    #gate-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 90px var(--ares-red);
+    }
 
-        /* --- DOCK --- */
-        #dock {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; z-index: 100; padding: 15px 30px;
-            background: rgba(10,10,10,0.9); border: 1px solid var(--red); border-radius: 50px;
-        }
-        .icon {
-            width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--red);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--red); cursor: pointer; transition: 0.2s; font-size: 1.2rem;
-        }
-        .icon.active { background: var(--red); color: #000; box-shadow: 0 0 15px var(--red); }
+    @keyframes gatePulse {
+      0%, 100% { opacity: 0.65; }
+      50%      { opacity: 1; }
+    }
 
-        h2 { color: var(--red); font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid var(--red); padding-bottom: 5px; }
-        input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--red); color: #fff; margin-bottom: 10px; outline: none; }
-        .log { font-size: 0.75rem; color: var(--red); margin-bottom: 5px; opacity: 0.8; }
+    #interface {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      display: none;
+    }
 
-        @keyframes breathe { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
-        @keyframes fadeUp { from { opacity: 0; transform: translate(-50%, -45%); } to { opacity: 1; transform: translate(-50%, -50%); } }
-    </style>
+    #bg-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      filter: brightness(0.38) contrast(1.1);
+      pointer-events: none;
+    }
+
+    #audio-mount {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 42px;
+      background: rgba(0,0,0,0.82);
+      border-bottom: 1px solid rgba(255,0,51,0.28);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.4rem;
+      font-size: 0.86rem;
+      color: #888;
+      backdrop-filter: blur(8px);
+    }
+
+    .status-left, .status-right {
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    #nodes {
+      color: var(--ares-red);
+      text-shadow: 0 0 10px var(--ares-red);
+    }
+
+    .audio-btn {
+      cursor: pointer;
+      padding: 6px 16px;
+      border: 1px solid var(--ares-red);
+      border-radius: 6px;
+      color: var(--ares-red);
+      font-weight: bold;
+      font-size: 0.78rem;
+      letter-spacing: 1.5px;
+      background: rgba(255,0,51,0.08);
+      transition: all 0.28s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .audio-btn.active {
+      background: rgba(0,255,0,0.18);
+      color: #00ff44;
+      border-color: #00ff44;
+      box-shadow: 0 0 16px rgba(0,255,68,0.45);
+    }
+
+    .audio-btn:active {
+      transform: scale(0.96);
+    }
+
+    .content-area {
+      position: relative;
+      z-index: 10;
+      height: calc(100dvh - 42px - 90px);
+      overflow-y: auto;
+      padding: 1.5rem 1.2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .holo-frame {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.65), inset 0 0 24px rgba(255,0,51,0.07);
+      width: 100%;
+      max-width: 620px;
+      padding: 2rem;
+      margin: 1.2rem 0;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .holo-frame.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    h2 {
+      color: var(--ares-red);
+      font-size: 1.1rem;
+      letter-spacing: 3px;
+      margin-bottom: 1.3rem;
+      border-bottom: 1px solid rgba(255,0,51,0.35);
+      padding-bottom: 0.6rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid #400;
+      color: white;
+      font-family: inherit;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    button.action {
+      width: 100%;
+      padding: 14px;
+      background: var(--ares-red);
+      color: black;
+      border: none;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: 0.25s;
+    }
+
+    button.action:active {
+      transform: scale(0.98);
+    }
+
+    #log-window .log-line {
+      font-size: 0.78rem;
+      color: rgba(255,0,51,0.75);
+      margin: 0.35rem 0;
+      opacity: 0.92;
+    }
+
+    #dock {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      gap: 1.4rem;
+      background: rgba(0,0,0,0.88);
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      border: 1px solid rgba(255,0,51,0.45);
+      backdrop-filter: blur(12px);
+    }
+
+    .dock-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 1.5px solid var(--ares-red);
+      color: var(--ares-red);
+      font-size: 1.4rem;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all 0.28s ease;
+    }
+
+    .dock-icon.active,
+    .dock-icon:hover {
+      background: var(--ares-red);
+      color: #000;
+      box-shadow: 0 0 22px var(--ares-red);
+      transform: scale(1.14);
+    }
+
+    @media (max-width: 480px) {
+      #dock { gap: 1rem; padding: 0.7rem 1.5rem; }
+      .dock-icon { width: 48px; height: 48px; font-size: 1.25rem; }
+      .content-area { padding: 1rem 0.9rem 5rem; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="gate" onclick="ignite()">
-    <button class="gate-btn">INITIATE</button>
+<div id="gate">
+  <button id="gate-btn">INITIATE ARES</button>
 </div>
 
-<div id="viewport">
-    <div id="interface">
-        <video id="bg-video" loop playsinline muted>
-            <source src="https://raw.githubusercontent.com/highland88999-commits/Ares/main/assets/No_people..._Ad.mp4" type="video/mp4">
-        </video>
-        <div id="pulse"></div>
+<div id="interface">
+  <video id="bg-video" loop playsinline muted>
+    <source src="https://raw.githubusercontent.com/highland88999-commits/Ares/main/assets/No_people..._Ad.mp4" type="video/mp4">
+  </video>
 
-        <div id="audio-mount"><div id="yt-player"></div></div>
+  <div id="audio-mount"></div>
 
-        <button id="play-btn" onclick="toggleAudio()">PLAY PLAYLIST</button>
-
-        <div id="f-mission" class="frame active">
-            <h2>MISSION PROFILE</h2>
-            <p>ARES decentralized protocol. Monitor traffic signatures and neutralize threats at the edge. Adaptation is the only security.</p>
-        </div>
-
-        <div id="f-scan" class="frame">
-            <h2>SCAM CHECKER</h2>
-            <input type="text" id="url" placeholder="URL SIGNATURE...">
-            <button onclick="runScan()" style="width:100%; padding:10px; background:var(--red); border:none; font-weight:bold; cursor:pointer;">SCAN</button>
-        </div>
-
-        <div id="f-logs" class="frame">
-            <h2>THREAT LOGS</h2>
-            <div id="log-box"></div>
-        </div>
-
-        <div id="dock">
-            <div class="icon active" onclick="nav('mission', this)">🛡️</div>
-            <div class="icon" onclick="nav('scan', this)">⚠️</div>
-            <div class="icon" onclick="nav('logs', this)">📜</div>
-        </div>
+  <div id="status-bar">
+    <div class="status-left">HIVE STATUS • LIVE</div>
+    
+    <div id="audio-control" class="audio-btn" onclick="togglePlaylist()">
+      <span id="audio-label">PLAY COMMS</span>
     </div>
+    
+    <div class="status-right">
+      NODES: <span id="nodes">1,204,812</span>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <div id="f-mission" class="holo-frame">
+      <h2>MISSION PROFILE</h2>
+      <p>ARES is a decentralized threat interception protocol.<br>
+         Monitor edge traffic signatures. Neutralize incursions in real time.<br>
+         <strong>Adaptation is the only constant defense.</strong></p>
+    </div>
+
+    <div id="f-scan" class="holo-frame">
+      <h2>THREAT SCANNER</h2>
+      <input type="text" id="scan-url" placeholder="PASTE URL / SIGNATURE..." autocomplete="off" />
+      <button class="action" onclick="runScan()">EXECUTE SCAN</button>
+      <div id="scan-result" style="margin-top:1rem; min-height:1.4rem; font-size:0.9rem; color:#777;">
+        [ awaiting input ]
+      </div>
+    </div>
+
+    <div id="f-logs" class="holo-frame">
+      <h2>ACTIVE TRACE LOG</h2>
+      <div id="log-window"></div>
+    </div>
+
+  </div>
+
+  <div id="dock">
+    <div class="dock-icon active" onclick="switchTab('mission', this)">🛡️</div>
+    <div class="dock-icon"         onclick="switchTab('scan',    this)">⚠️</div>
+    <div class="dock-icon"         onclick="switchTab('logs',    this)">📜</div>
+  </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    let player;
-    let isPlaying = false;
-    let playerReady = false;
+// ── Globals ───────────────────────────────────────────
+let player = null;
+let playerReady = false;
+let isAudioOn = false;
 
-    // 1. Initialize API
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('yt-player', {
-            height: '200', width: '200', // Must be non-zero for some browsers, hidden by CSS
-            playerVars: {
-                'listType': 'playlist',
-                'list': 'PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV',
-                'autoplay': 0,
-                'controls': 0,
-                'disablekb': 1,
-                'fs': 0
-            },
-            events: {
-                'onReady': onPlayerReady
-            }
-        });
+// ── YouTube API Ready ────────────────────────────────
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('audio-mount', {
+    height: '1',
+    width:  '1',
+    playerVars: {
+      listType: 'playlist',
+      list: 'PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV',
+      autoplay: 0,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      rel: 0,
+      modestbranding: 1
+    },
+    events: {
+      'onReady':       onPlayerReady,
+      'onStateChange': onPlayerStateChange
     }
+  });
+}
 
-    function onPlayerReady(event) {
-        playerReady = true;
-        // Set volume to max just in case
-        event.target.setVolume(100); 
-    }
+function onPlayerReady(event) {
+  playerReady = true;
+  document.getElementById('audio-control').style.opacity = '1';
+  document.getElementById('audio-label').textContent = "PLAY COMMS";
+  event.target.setVolume(90);
+}
 
-    // 2. Ignite System
-    function ignite() {
-        document.getElementById('gate').style.display = 'none';
-        document.getElementById('interface').style.display = 'block';
-        document.getElementById('bg-video').play();
-        setInterval(doLogs, 2000);
-    }
+function onPlayerStateChange(event) {
+  const btn = document.getElementById('audio-control');
+  const label = document.getElementById('audio-label');
 
-    // 3. Toggle Audio (Connected to Button)
-    function toggleAudio() {
-        const btn = document.getElementById('play-btn');
-        
-        if (!playerReady) {
-            alert("System initializing... try again in 1 second.");
-            return;
-        }
+  if (event.data === YT.PlayerState.PLAYING) {
+    isAudioOn = true;
+    btn.classList.add('active');
+    label.textContent = "STOP COMMS";
+  } else {
+    isAudioOn = false;
+    btn.classList.remove('active');
+    label.textContent = "PLAY COMMS";
+  }
+}
 
-        if (!isPlaying) {
-            player.playVideo();
-            btn.innerHTML = "PAUSE PLAYLIST";
-            btn.style.borderColor = "#00ff00";
-            btn.style.color = "#00ff00";
-            isPlaying = true;
-        } else {
-            player.pauseVideo();
-            btn.innerHTML = "PLAY PLAYLIST";
-            btn.style.borderColor = "var(--red)";
-            btn.style.color = "var(--red)";
-            isPlaying = false;
-        }
-    }
+// ── Ignition ──────────────────────────────────────────
+document.getElementById('gate-btn').onclick = function ignite() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('interface').style.display = 'block';
 
-    // Navigation Logic
-    function nav(id, el) {
-        document.querySelectorAll('.frame').forEach(f => f.classList.remove('active'));
-        document.querySelectorAll('.icon').forEach(i => i.classList.remove('active'));
-        document.getElementById('f-' + id).classList.add('active');
-        el.classList.add('active');
-    }
+  document.getElementById('bg-video').play().catch(() => {});
 
-    function runScan() {
-        const val = document.getElementById('url').value;
-        if(val) window.open('https://www.google.com/search?q=scam+report+' + encodeURIComponent(val), '_blank');
-    }
+  switchTab('mission', document.querySelector('#dock .dock-icon'));
 
-    function doLogs() {
-        const box = document.getElementById('log-box');
-        const d = document.createElement('div');
-        d.className = 'log';
-        d.innerHTML = `> [${new Date().toLocaleTimeString()}] PACKET TRACED... [SECURE]`;
-        box.prepend(d);
-        if(box.children.length > 8) box.lastChild.remove();
-    }
+  setInterval(addLogLine, 2400);
+};
+
+// ── Audio toggle ──────────────────────────────────────
+function togglePlaylist() {
+  if (!playerReady) {
+    alert("Audio engine still initializing...");
+    return;
+  }
+
+  if (isAudioOn) {
+    player.pauseVideo();
+  } else {
+    player.playVideo();
+  }
+}
+
+// ── Tab switching ─────────────────────────────────────
+function switchTab(tab, clickedIcon) {
+  document.querySelectorAll('.holo-frame').forEach(el => el.classList.remove('visible'));
+  document.querySelectorAll('.dock-icon').forEach(el => el.classList.remove('active'));
+
+  document.getElementById('f-' + tab).classList.add('visible');
+  clickedIcon.classList.add('active');
+}
+
+// ── Fake log generator ────────────────────────────────
+function addLogLine() {
+  const log = document.getElementById('log-window');
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.textContent = `[${new Date().toLocaleTimeString()}] → Packet trace ${Math.floor(Math.random()*9999).toString().padStart(4,'0')} • [SECURE]`;
+  log.prepend(line);
+  if (log.children.length > 12) log.removeChild(log.lastChild);
+}
+
+// ── Scanner action ────────────────────────────────────
+function runScan() {
+  const url = document.getElementById('scan-url').value.trim();
+  if (!url) return;
+
+  const result = document.getElementById('scan-result');
+  result.textContent = "[ QUERYING HIVE BLACKLIST... ]";
+
+  setTimeout(() => {
+    result.innerHTML = `<span style="color:var(--ares-red)">[ SUSPICIOUS SIGNATURE MATCH ]</span>`;
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(url)}+scam+report+virustotal+urlvoid`, '_blank');
+
+    setTimeout(() => {
+      result.textContent = "[ READY ]";
+    }, 4800);
+  }, 1600);
+}
+
+// ── Node counter simulation ───────────────────────────
+setInterval(() => {
+  const base = 1204812;
+  const jitter = Math.floor(Math.random() * 80) - 40;
+  document.getElementById('nodes').textContent = (base + jitter).toLocaleString();
+}, 2200);
 </script>
 </body>
 </html>
