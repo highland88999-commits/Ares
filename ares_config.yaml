@@ -1,0 +1,15 @@
+# Ares Rules of Engagement
+version: 1.0
+
+whitelist:
+  - "127.0.0.1"      # Localhost
+  - "YOUR_HOME_IP"   # Add your current IP here
+  - "MILES_IP"       # Pre-whitelist Miles
+
+thresholds:
+  max_attempts: 5    # Number of hits before a 'Shun'
+  tarpit_delay: 30   # Seconds between bytes in the Dreadnought
+
+endpoints:
+  - "https://yourwebsite.com"
+  - "https://your-other-site.ca"
