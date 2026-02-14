@@ -2,55 +2,259 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARES | Global Command</title>
     <style>
-        body { background: #0f0f0f; color: #00ff41; font-family: 'Courier New', monospace; padding: 20px; }
-        .folder-container { border: 1px solid #333; margin-bottom: 10px; border-radius: 5px; overflow: hidden; }
-        .folder-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .folder-header:hover { background: #222; }
-        .folder-content { display: none; padding: 15px; background: #0a0a0a; border-top: 1px solid #333; }
-        .crime-tag { background: #ff0000; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; text-transform: uppercase; }
-        .btn-report { background: #d9534f; color: white; text-decoration: none; padding: 10px; display: inline-block; margin-top: 10px; border-radius: 3px; }
-        .ip-text { font-weight: bold; font-size: 1.2em; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #ff0000;
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            /* Red neon bloom border around entire page */
+            box-shadow: 
+                0 0 20px 5px rgba(255, 0, 0, 0.4),
+                0 0 40px 15px rgba(255, 0, 0, 0.3),
+                0 0 80px 30px rgba(255, 0, 0, 0.2),
+                inset 0 0 60px 10px rgba(255, 0, 0, 0.15);
+            animation: neonPulse 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes neonPulse {
+            0% { box-shadow: 0 0 20px 5px rgba(255,0,0,0.4), 0 0 40px 15px rgba(255,0,0,0.3), 0 0 80px 30px rgba(255,0,0,0.2), inset 0 0 60px 10px rgba(255,0,0,0.15); }
+            100% { box-shadow: 0 0 30px 10px rgba(255,0,0,0.6), 0 0 60px 25px rgba(255,0,0,0.45), 0 0 120px 50px rgba(255,0,0,0.3), inset 0 0 90px 20px rgba(255,0,0,0.25); }
+        }
+
+        /* Background video */
+        #bg-video {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            opacity: 0.25; /* subtle overlay */
+        }
+
+        /* Overlay content wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.8em;
+            text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+        }
+
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ff0000, transparent);
+            margin: 30px 0;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        .folder-container {
+            background: rgba(10, 10, 10, 0.65);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .folder-header {
+            background: rgba(30, 0, 0, 0.7);
+            padding: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .folder-header:hover {
+            background: rgba(60, 0, 0, 0.8);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .folder-content {
+            display: none;
+            padding: 20px;
+            background: rgba(5, 5, 5, 0.6);
+        }
+
+        .crime-tag {
+            background: #ff0000;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-shadow: 0 0 5px #000;
+        }
+
+        .ip-text {
+            font-weight: bold;
+            font-size: 1.4em;
+            text-shadow: 0 0 8px #ff0000;
+        }
+
+        .btn-report {
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+        }
+
+        .btn-report:hover {
+            background: #ff0000;
+            box-shadow: 0 0 30px #ff0000;
+        }
+
+        /* DEMO MODE overlay with binary digital rain */
+        #demo-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.35;
+            animation: flash 6s infinite alternate ease-in-out;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.45; }
+        }
+
+        #demo-label {
+            font-size: 8em;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000;
+            letter-spacing: 10px;
+            transform: rotate(-15deg);
+            user-select: none;
+        }
+
+        /* Binary digital rain canvas behind label */
+        #digital-rain {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
     </style>
 </head>
 <body>
-    <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
-    <hr>
 
-    {% for offender in offenders %}
-    <div class="folder-container">
-        <div class="folder-header" onclick="toggleFolder('{{ offender.ip }}')">
-            <div>
-                <span class="ip-text">📂 {{ offender.ip }}</span>
-                <span style="margin-left: 20px; color: #888;">Detected: {{ offender.timestamp }}</span>
+    <!-- Background video -->
+    <video id="bg-video" autoplay muted loop playsinline>
+        <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="content-wrapper">
+        <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
+        <hr>
+
+        {% for offender in offenders %}
+        <div class="folder-container">
+            <div class="folder-header" onclick="toggleFolder('{{ offender.ip }}')">
+                <div>
+                    <span class="ip-text">📂 {{ offender.ip }}</span>
+                    <span style="margin-left: 25px; color: #888;">Detected: {{ offender.timestamp }}</span>
+                </div>
+                <span class="crime-tag">{{ offender.category }}</span>
             </div>
-            <span class="crime-tag">{{ offender.category }}</span>
-        </div>
 
-        <div id="{{ offender.ip }}" class="folder-content">
-            <h4>Alleged Crimes:</h4>
-            <ul>
-                {% for log in offender.logs %}
-                <li><code>{{ log }}</code></li>
-                {% endfor %}
-            </ul>
-            <p><strong>Status:</strong> Permanently in the Void.</p>
-            <a href="/generate_report/{{ offender.ip }}" class="btn-report">Engage {{ offender.country }} Authorities</a>
+            <div id="{{ offender.ip }}" class="folder-content">
+                <h4>Alleged Crimes:</h4>
+                <ul>
+                    {% for log in offender.logs %}
+                    <li><code style="color: #ff4444;">{{ log }}</code></li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Status:</strong> Permanently in the Void.</p>
+                <a href="/generate_report/{{ offender.ip }}" class="btn-report">Engage {{ offender.country }} Authorities</a>
+            </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+
+    <!-- DEMO MODE overlay -->
+    <div id="demo-overlay">
+        <canvas id="digital-rain"></canvas>
+        <div id="demo-label">DEMO MODE</div>
+    </div>
 
     <script>
+        // Folder toggle
         function toggleFolder(id) {
-            var x = document.getElementById(id);
-            if (x.style.display === "none" || x.style.display === "") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
+            var el = document.getElementById(id);
+            el.style.display = (el.style.display === "block") ? "none" : "block";
+        }
+
+        // Simple Matrix-style binary digital rain (slow version)
+        const canvas = document.getElementById('digital-rain');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const binary = '01';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawRain() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#440000'; // dark red binary
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = binary.charAt(Math.floor(Math.random() * binary.length));
+                const x = i * fontSize;
+                const y = drops[i] * fontSize;
+
+                ctx.fillText(text, x, y);
+
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0; // reset drop
+                }
+                drops[i]++;
             }
         }
+
+        setInterval(drawRain, 120); // slower rain for subtle effect
+
+        // Resize handling
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
-    
