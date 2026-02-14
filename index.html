@@ -14,255 +14,130 @@
       --text-dim:     #777;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
     html, body {
-      width: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background: #000;
-      font-family: 'Courier New', Courier, monospace;
-      color: white;
-      touch-action: manipulation;
+      width:100%; height:100dvh; overflow:hidden; background:#000;
+      font-family:'Courier New',monospace; color:white; touch-action:manipulation;
     }
 
     #gate {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position:fixed; inset:0; z-index:9999; background:#000;
+      display:flex; justify-content:center; align-items:center;
     }
 
     #gate-btn {
-      padding: 1.4rem 3.8rem;
-      font-size: clamp(1.3rem, 7vw, 2.6rem);
-      font-weight: bold;
-      letter-spacing: 0.9rem;
-      color: var(--ares-red);
-      border: 2px solid var(--ares-red);
-      background: transparent;
-      text-shadow: 0 0 16px rgba(255,0,51,0.7);
-      box-shadow: 0 0 60px rgba(255,0,51,0.35);
-      cursor: pointer;
-      transition: all 0.35s ease;
-      animation: gatePulse 4s infinite ease-in-out;
+      padding:1.4rem 3.8rem; font-size:clamp(1.3rem,7vw,2.6rem); font-weight:bold;
+      letter-spacing:0.9rem; color:var(--ares-red); border:2px solid var(--ares-red);
+      background:transparent; text-shadow:0 0 16px rgba(255,0,51,0.7);
+      box-shadow:0 0 60px rgba(255,0,51,0.35); cursor:pointer;
+      transition:all 0.35s ease; animation:gatePulse 4s infinite ease-in-out;
     }
 
-    #gate-btn:active {
-      transform: scale(0.96);
-      box-shadow: 0 0 90px var(--ares-red);
-    }
+    #gate-btn:active { transform:scale(0.96); box-shadow:0 0 90px var(--ares-red); }
 
-    @keyframes gatePulse {
-      0%, 100% { opacity: 0.65; }
-      50%      { opacity: 1; }
-    }
+    @keyframes gatePulse { 0%,100% {opacity:0.65} 50% {opacity:1} }
 
-    #interface {
-      position: relative;
-      width: 100%;
-      height: 100dvh;
-      display: none;
-    }
+    #interface { position:relative; width:100%; height:100dvh; display:none; }
 
     #bg-video {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-      filter: brightness(0.38) contrast(1.1);
-      pointer-events: none;
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+      z-index:1; filter:brightness(0.38) contrast(1.1); pointer-events:none;
     }
 
-    #audio-mount {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
+    /* Larger hidden player improves reliability */
+    #audio-player-container {
+      position:absolute; left:-9999px; top:-9999px; width:300px; height:200px;
     }
 
     #status-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 42px;
-      background: rgba(0,0,0,0.82);
-      border-bottom: 1px solid rgba(255,0,51,0.28);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.4rem;
-      font-size: 0.86rem;
-      color: #888;
-      backdrop-filter: blur(8px);
+      position:fixed; top:0; left:0; right:0; height:42px;
+      background:rgba(0,0,0,0.82); border-bottom:1px solid rgba(255,0,51,0.28);
+      z-index:2000; display:flex; align-items:center; justify-content:space-between;
+      padding:0 1.4rem; font-size:0.86rem; color:#888; backdrop-filter:blur(8px);
     }
 
-    .status-left, .status-right {
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
+    .status-left, .status-right { font-weight:bold; letter-spacing:1px; }
 
-    #nodes {
-      color: var(--ares-red);
-      text-shadow: 0 0 10px var(--ares-red);
-    }
+    #nodes { color:var(--ares-red); text-shadow:0 0 10px var(--ares-red); }
 
     .audio-btn {
-      cursor: pointer;
-      padding: 6px 16px;
-      border: 1px solid var(--ares-red);
-      border-radius: 6px;
-      color: var(--ares-red);
-      font-weight: bold;
-      font-size: 0.78rem;
-      letter-spacing: 1.5px;
-      background: rgba(255,0,51,0.08);
-      transition: all 0.28s ease;
-      user-select: none;
-      -webkit-user-select: none;
+      cursor:pointer; padding:6px 16px; border:1px solid var(--ares-red);
+      border-radius:6px; color:var(--ares-red); font-weight:bold; font-size:0.78rem;
+      letter-spacing:1.5px; background:rgba(255,0,51,0.08); transition:all 0.28s ease;
+      user-select:none; -webkit-user-select:none;
     }
 
     .audio-btn.active {
-      background: rgba(0,255,0,0.18);
-      color: #00ff44;
-      border-color: #00ff44;
-      box-shadow: 0 0 16px rgba(0,255,68,0.45);
+      background:rgba(0,255,0,0.18); color:#00ff44; border-color:#00ff44;
+      box-shadow:0 0 16px rgba(0,255,68,0.45);
     }
 
-    .audio-btn:active {
-      transform: scale(0.96);
-    }
+    .audio-btn:active { transform:scale(0.96); }
 
     .content-area {
-      position: relative;
-      z-index: 10;
-      height: calc(100dvh - 42px - 90px);
-      overflow-y: auto;
-      padding: 1.5rem 1.2rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      position:relative; z-index:10; height:calc(100dvh - 42px - 90px);
+      overflow-y:auto; padding:1.5rem 1.2rem 1rem; display:flex; flex-direction:column;
+      align-items:center;
     }
 
     .holo-frame {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px) saturate(140%);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.65), inset 0 0 24px rgba(255,0,51,0.07);
-      width: 100%;
-      max-width: 620px;
-      padding: 2rem;
-      margin: 1.2rem 0;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      background:var(--glass-bg); backdrop-filter:blur(16px) saturate(140%);
+      border:1px solid var(--glass-border); border-radius:10px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.65), inset 0 0 24px rgba(255,0,51,0.07);
+      width:100%; max-width:620px; padding:2rem; margin:1.2rem 0;
+      opacity:0; transform:translateY(30px);
+      transition:all 0.55s cubic-bezier(0.16,1,0.3,1);
     }
 
-    .holo-frame.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .holo-frame.visible { opacity:1; transform:translateY(0); }
 
     h2 {
-      color: var(--ares-red);
-      font-size: 1.1rem;
-      letter-spacing: 3px;
-      margin-bottom: 1.3rem;
-      border-bottom: 1px solid rgba(255,0,51,0.35);
-      padding-bottom: 0.6rem;
+      color:var(--ares-red); font-size:1.1rem; letter-spacing:3px;
+      margin-bottom:1.3rem; border-bottom:1px solid rgba(255,0,51,0.35);
+      padding-bottom:0.6rem;
     }
 
     input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid #400;
-      color: white;
-      font-family: inherit;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 5px;
-      outline: none;
+      width:100%; padding:14px; background:rgba(0,0,0,0.6);
+      border:1px solid #400; color:white; font-family:inherit; font-size:1rem;
+      margin-bottom:1rem; border-radius:5px; outline:none;
     }
 
     button.action {
-      width: 100%;
-      padding: 14px;
-      background: var(--ares-red);
-      color: black;
-      border: none;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: 0.25s;
+      width:100%; padding:14px; background:var(--ares-red); color:black;
+      border:none; font-weight:bold; font-size:1rem; cursor:pointer;
+      border-radius:5px; transition:0.25s;
     }
 
-    button.action:active {
-      transform: scale(0.98);
-    }
+    button.action:active { transform:scale(0.98); }
 
     #log-window .log-line {
-      font-size: 0.78rem;
-      color: rgba(255,0,51,0.75);
-      margin: 0.35rem 0;
-      opacity: 0.92;
+      font-size:0.78rem; color:rgba(255,0,51,0.75); margin:0.35rem 0; opacity:0.92;
     }
 
     #dock {
-      position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      display: flex;
-      gap: 1.4rem;
-      background: rgba(0,0,0,0.88);
-      padding: 0.8rem 2rem;
-      border-radius: 3rem;
-      border: 1px solid rgba(255,0,51,0.45);
-      backdrop-filter: blur(12px);
+      position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
+      z-index:1000; display:flex; gap:1.4rem; background:rgba(0,0,0,0.88);
+      padding:0.8rem 2rem; border-radius:3rem;
+      border:1px solid rgba(255,0,51,0.45); backdrop-filter:blur(12px);
     }
 
     .dock-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      border: 1.5px solid var(--ares-red);
-      color: var(--ares-red);
-      font-size: 1.4rem;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      transition: all 0.28s ease;
+      width:54px; height:54px; border-radius:50%; border:1.5px solid var(--ares-red);
+      color:var(--ares-red); font-size:1.4rem; display:grid; place-items:center;
+      cursor:pointer; transition:all 0.28s ease;
     }
 
-    .dock-icon.active,
-    .dock-icon:hover {
-      background: var(--ares-red);
-      color: #000;
-      box-shadow: 0 0 22px var(--ares-red);
-      transform: scale(1.14);
+    .dock-icon.active, .dock-icon:hover {
+      background:var(--ares-red); color:#000; box-shadow:0 0 22px var(--ares-red);
+      transform:scale(1.14);
     }
 
-    @media (max-width: 480px) {
-      #dock { gap: 1rem; padding: 0.7rem 1.5rem; }
-      .dock-icon { width: 48px; height: 48px; font-size: 1.25rem; }
-      .content-area { padding: 1rem 0.9rem 5rem; }
+    @media (max-width:480px) {
+      #dock { gap:1rem; padding:0.7rem 1.5rem; }
+      .dock-icon { width:48px; height:48px; font-size:1.25rem; }
+      .content-area { padding:1rem 0.9rem 5rem; }
     }
   </style>
 </head>
@@ -277,7 +152,10 @@
     <source src="https://raw.githubusercontent.com/highland88999-commits/Ares/main/assets/No_people..._Ad.mp4" type="video/mp4">
   </video>
 
-  <div id="audio-mount"></div>
+  <!-- Audio player container (larger size helps reliability) -->
+  <div id="audio-player-container">
+    <div id="audio-mount"></div>
+  </div>
 
   <!-- Status Bar -->
   <div id="status-bar">
@@ -293,8 +171,7 @@
   </div>
 
   <div class="content-area">
-
-    <div id="f-mission" class="holo-frame">
+    <div id="f-mission" class="holo-frame visible">
       <h2>MISSION PROFILE</h2>
       <p>ARES is a decentralized threat interception protocol.<br>
          Monitor edge traffic signatures. Neutralize incursions in real time.<br>
@@ -314,7 +191,6 @@
       <h2>ACTIVE TRACE LOG</h2>
       <div id="log-window"></div>
     </div>
-
   </div>
 
   <div id="dock">
@@ -326,16 +202,16 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-// ── Globals ───────────────────────────────────────────
+// Globals
 let player = null;
 let playerReady = false;
 let isAudioOn = false;
 
-// ── YouTube API Ready ────────────────────────────────
+// YouTube API Ready
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('audio-mount', {
-    height: '1',
-    width:  '1',
+    height: '200',
+    width: '300',
     playerVars: {
       listType: 'playlist',
       list: 'PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV',
@@ -345,10 +221,10 @@ function onYouTubeIframeAPIReady() {
       fs: 0,
       rel: 0,
       modestbranding: 1,
-      mute: 1
+      mute: 1  // Start muted — required by most browsers
     },
     events: {
-      'onReady':       onPlayerReady,
+      'onReady': onPlayerReady,
       'onStateChange': onPlayerStateChange
     }
   });
@@ -358,7 +234,7 @@ function onPlayerReady(event) {
   playerReady = true;
   document.getElementById('audio-control').style.opacity = '1';
   document.getElementById('audio-label').textContent = "PLAY COMMS";
-  event.target.setVolume(90);
+  event.target.setVolume(80);
 }
 
 function onPlayerStateChange(event) {
@@ -369,14 +245,14 @@ function onPlayerStateChange(event) {
     isAudioOn = true;
     btn.classList.add('active');
     label.textContent = "STOP COMMS";
-  } else {
+  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
     isAudioOn = false;
     btn.classList.remove('active');
     label.textContent = "PLAY COMMS";
   }
 }
 
-// ── Ignition ──────────────────────────────────────────
+// Ignition
 document.getElementById('gate-btn').onclick = function ignite() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('interface').style.display = 'block';
@@ -388,10 +264,10 @@ document.getElementById('gate-btn').onclick = function ignite() {
   setInterval(addLogLine, 2400);
 };
 
-// ── Audio toggle ──────────────────────────────────────
+// Audio toggle (called on button click)
 function togglePlaylist() {
   if (!playerReady) {
-    alert("Audio engine still initializing... wait 2–3 seconds.");
+    alert("Audio system warming up... try again in 2–4 seconds.");
     return;
   }
 
@@ -399,10 +275,12 @@ function togglePlaylist() {
     player.pauseVideo();
   } else {
     player.playVideo();
+    // Attempt to unmute after gesture (works in some browsers)
+    // player.unMute();  // Uncomment if you want to try aggressive unmuting
   }
 }
 
-// ── Tab switching ─────────────────────────────────────
+// Tab switching
 function switchTab(tab, clickedIcon) {
   document.querySelectorAll('.holo-frame').forEach(el => el.classList.remove('visible'));
   document.querySelectorAll('.dock-icon').forEach(el => el.classList.remove('active'));
@@ -411,7 +289,7 @@ function switchTab(tab, clickedIcon) {
   clickedIcon.classList.add('active');
 }
 
-// ── Fake log generator ────────────────────────────────
+// Fake logs
 function addLogLine() {
   const log = document.getElementById('log-window');
   const line = document.createElement('div');
@@ -421,7 +299,7 @@ function addLogLine() {
   if (log.children.length > 12) log.removeChild(log.lastChild);
 }
 
-// ── Scanner with staged animation ────────────────────
+// Scanner with steps
 function runScan() {
   const url = document.getElementById('scan-url').value.trim();
   if (!url) return;
@@ -455,7 +333,7 @@ function finalizeScan(url, result) {
   }, 1200);
 }
 
-// ── Node counter simulation ───────────────────────────
+// Node counter
 setInterval(() => {
   const base = 1204812;
   const jitter = Math.floor(Math.random() * 80) - 40;
