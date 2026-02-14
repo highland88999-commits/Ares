@@ -31,3 +31,12 @@ def receive_report():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8888) # Secure this with an API key later
+    @app.route('/v1/bulk_report', methods=['POST'])
+def bulk_report():
+    data = request.json
+    found_threats = data.get('threats', [])
+    for threat in found_threats:
+        # Add to the 'Book of War' and check for global consensus
+        process_threat(threat)
+    return jsonify({"status": "INTEL_RECEIVED"}), 200
+    
