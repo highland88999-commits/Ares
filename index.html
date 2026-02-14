@@ -319,8 +319,8 @@
 
   <div id="dock">
     <div class="dock-icon active" onclick="switchTab('mission', this)">🛡️</div>
-    <div class="dock-icon"         onclick="switchTab('scan',    this)">⚠️</div>
-    <div class="dock-icon"         onclick="switchTab('logs',    this)">📜</div>
+    <div class="dock-icon" onclick="switchTab('scan', this)">⚠️</div>
+    <div class="dock-icon" onclick="switchTab('logs', this)">📜</div>
   </div>
 </div>
 
@@ -345,7 +345,7 @@ function onYouTubeIframeAPIReady() {
       fs: 0,
       rel: 0,
       modestbranding: 1,
-      mute: 1               // Start muted (policy compliant)
+      mute: 1
     },
     events: {
       'onReady':       onPlayerReady,
@@ -391,7 +391,7 @@ document.getElementById('gate-btn').onclick = function ignite() {
 // ── Audio toggle ──────────────────────────────────────
 function togglePlaylist() {
   if (!playerReady) {
-    alert("Audio engine still initializing...");
+    alert("Audio engine still initializing... wait 2–3 seconds.");
     return;
   }
 
@@ -399,8 +399,6 @@ function togglePlaylist() {
     player.pauseVideo();
   } else {
     player.playVideo();
-    // Optional: user can unmute manually via YouTube player if they want
-    // player.unMute();  // Uncomment only if you add a separate unmute button
   }
 }
 
