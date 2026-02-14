@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>ARES | Hunter Terminal</title>
     <style>
-        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.7); }
+        :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.8); }
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
@@ -15,63 +15,61 @@
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .gate-btn {
-            padding: 20px 40px; border: 2px solid var(--ares-red);
-            color: var(--ares-red); letter-spacing: 12px; font-weight: bold;
-            text-shadow: 0 0 15px var(--ares-red); animation: pulse 2s infinite;
+            padding: 30px 60px; border: 2px solid var(--ares-red);
+            color: var(--ares-red); letter-spacing: 15px; font-weight: bold;
+            text-shadow: 0 0 20px var(--ares-red); animation: pulse 2s infinite;
+            background: rgba(255, 0, 0, 0.05);
         }
 
         /* --- STAGE 2: TERMINAL --- */
         #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
 
-        /* Video Background */
         .full-vid { 
             position: absolute; width: 100vw; height: 100vh; 
-            top: 0; left: 0; object-fit: cover; z-index: 5; opacity: 0.4;
+            top: 0; left: 0; object-fit: cover; z-index: 5; opacity: 0.5;
         }
 
-        /* Hive Counter (Top Right) */
         #hive-pop {
             position: fixed; top: 20px; right: 20px; z-index: 2000;
             text-align: right; color: var(--ares-red); font-weight: bold;
-            background: var(--glass); padding: 10px 20px; border-right: 4px solid var(--ares-red);
+            background: var(--glass); padding: 12px 25px; border-right: 4px solid var(--ares-red);
+            backdrop-filter: blur(5px);
         }
 
-        /* Hunter Log (Bottom Left - NEW!) */
         #hunter-log {
-            position: fixed; bottom: 100px; left: 20px; width: 300px; height: 150px;
-            z-index: 2000; overflow: hidden; font-size: 0.7rem; color: rgba(255, 0, 0, 0.7);
-            background: linear-gradient(to bottom, transparent, #000);
+            position: fixed; bottom: 120px; left: 25px; width: 320px; height: 160px;
+            z-index: 2000; overflow: hidden; font-size: 0.75rem; color: rgba(255, 0, 0, 0.8);
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.9));
             pointer-events: none; display: flex; flex-direction: column-reverse;
         }
-        .log-entry { margin-bottom: 4px; text-shadow: 0 0 5px var(--ares-red); }
+        .log-entry { margin-bottom: 5px; font-family: 'Courier New'; }
 
-        /* Center Content */
         #terminal-shell {
-            position: relative; z-index: 100; padding: 20px;
-            height: calc(100vh - 100px); overflow-y: auto; display: flex; justify-content: center;
+            position: relative; z-index: 100; padding: 25px;
+            height: calc(100vh - 110px); overflow-y: auto; display: flex; justify-content: center;
         }
 
         .holo-window {
-            background: var(--glass); border: 1px solid var(--ares-red);
-            width: 100%; max-width: 600px; padding: 30px; margin-top: 50px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.1); backdrop-filter: blur(10px);
+            background: var(--glass); border: 1px solid rgba(255, 0, 0, 0.4);
+            width: 100%; max-width: 650px; padding: 35px; margin-top: 40px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 1); backdrop-filter: blur(15px);
+            border-radius: 2px;
         }
 
-        /* Dock */
         #hud-dock {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; z-index: 1000;
-            background: rgba(0,0,0,0.9); padding: 15px 40px; border-radius: 50px;
-            border: 1px solid var(--ares-red);
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 25px; z-index: 1000;
+            background: rgba(0,0,0,0.95); padding: 15px 45px; border-radius: 60px;
+            border: 1px solid var(--ares-red); box-shadow: 0 0 20px rgba(255,0,0,0.2);
         }
         .icon {
-            width: 50px; height: 50px; border: 1px solid var(--ares-red);
+            width: 55px; height: 55px; border: 1px solid var(--ares-red);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--ares-red); transition: 0.2s;
+            cursor: pointer; color: var(--ares-red); transition: 0.3s ease;
         }
-        .icon.active, .icon:hover { background: var(--ares-red); color: #000; box-shadow: 0 0 20px var(--ares-red); }
+        .icon.active { background: var(--ares-red); color: #000; box-shadow: 0 0 25px var(--ares-red); }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.02); } }
     </style>
 </head>
 <body>
@@ -81,57 +79,79 @@
 </div>
 
 <div id="main-terminal">
-    <video id="bg-video" class="full-vid" loop playsinline muted>
+    <video id="bg-video" class="full-vid" loop playsinline>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
 
-    <div id="audio-engine"></div>
+    <div id="audio-engine" style="position: absolute; width: 0; height: 0; visibility: hidden;"></div>
 
     <div id="hive-pop">
-        <div style="font-size: 0.6rem; opacity: 0.7;">ACTIVE NODES</div>
+        <div style="font-size: 0.65rem; letter-spacing: 2px; opacity: 0.7;">ACTIVE HIVE NODES</div>
         <span id="nodes">1,204,812</span>
     </div>
 
-    <div id="hunter-log">
-        </div>
+    <div id="hunter-log"></div>
 
     <div id="terminal-shell">
         <div id="win-brief" class="holo-window">
-            <h2 style="color:var(--ares-red); letter-spacing: 4px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px; margin-bottom: 20px;">MISSION BRIEF</h2>
-            <p style="line-height: 1.6; opacity: 0.9;">"ARES transforms the global network into a weaponized defense grid. We do not wait for the breach; we hunt the signal."</p>
+            <h2 style="color:var(--ares-red); letter-spacing: 5px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px; margin-bottom: 25px;">MISSION BRIEF</h2>
+            <p style="line-height: 1.8; font-size: 1.1rem; opacity: 0.9;">"ARES transforms the global network into a weaponized defense grid. We do not wait for the breach; we hunt the signal."</p>
         </div>
 
         <div id="win-scan" class="holo-window" style="display:none;">
-            <h2 style="color:var(--ares-red); letter-spacing: 4px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px; margin-bottom: 20px;">THREAT SCANNER</h2>
-            <input type="text" id="scan-in" placeholder="ENTER URL SIGNATURE..." style="width:100%; padding:15px; background:rgba(0,0,0,0.5); border:1px solid var(--ares-red); color:#fff; font-family:inherit; outline:none; margin-bottom: 15px;">
-            <button onclick="runScan()" style="width: 100%; padding:15px; background:var(--ares-red); color:#000; border:none; font-weight:bold; cursor:pointer; letter-spacing: 2px;">INITIATE SCAN</button>
+            <h2 style="color:var(--ares-red); letter-spacing: 5px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px; margin-bottom: 25px;">THREAT SCANNER</h2>
+            <input type="text" id="scan-in" placeholder="URL SIGNATURE..." style="width:100%; padding:18px; background:rgba(0,0,0,0.6); border:1px solid var(--ares-red); color:#fff; font-family:inherit; outline:none; margin-bottom: 20px;">
+            <button onclick="runScan()" style="width: 100%; padding:18px; background:var(--ares-red); color:#000; border:none; font-weight:bold; cursor:pointer; letter-spacing: 3px; font-size: 1rem;">EXECUTE SCAN</button>
         </div>
     </div>
 
     <div id="hud-dock">
         <div class="icon active" id="ic-brief" onclick="showTab('brief')">🛡️</div>
         <div class="icon" id="ic-scan" onclick="showTab('scan')">⚠️</div>
+        <div class="icon" onclick="toggleAudio()">🔊</div>
     </div>
 </div>
 
 <script>
+    let isMuted = false;
+
     function initTerminal() {
+        // 1. Transition UI
         document.getElementById('entry-gate').style.display = 'none';
         document.getElementById('main-terminal').style.display = 'block';
 
-        // 1. Force Video
+        // 2. FORCE VIDEO PLAY (Unmuted)
         const v = document.getElementById('bg-video');
-        v.play().then(() => { v.muted = false; });
+        v.muted = false;
+        v.volume = 1.0;
+        let playPromise = v.play();
 
-        // 2. Force Audio (Dutchman Method)
-        document.getElementById('audio-engine').innerHTML = `
-            <iframe width="1" height="1" 
-            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
-            frameborder="0" allow="autoplay"></iframe>
-        `;
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("Video autoplay blocked. User must interact again.");
+            });
+        }
 
-        // 3. Start the Hunter Log
-        setInterval(updateLog, 800);
+        // 3. FORCE AUDIO ENGINE (High-priority injection)
+        const engine = document.getElementById('audio-engine');
+        const audioFrame = document.createElement('iframe');
+        audioFrame.width = "1";
+        audioFrame.height = "1";
+        // Using the embed playlist URL format with explicit autoplay and mute=0
+        audioFrame.src = "https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0&enablejsapi=1&rel=0";
+        audioFrame.allow = "autoplay; encrypted-media";
+        audioFrame.frameBorder = "0";
+        engine.appendChild(audioFrame);
+
+        // 4. Start Log & Hive
+        setInterval(updateLog, 900);
+    }
+
+    function toggleAudio() {
+        const v = document.getElementById('bg-video');
+        isMuted = !isMuted;
+        v.muted = isMuted;
+        alert(isMuted ? "Audio Dampened" : "Audio Maximized");
     }
 
     function showTab(tab) {
@@ -148,7 +168,6 @@
         if(url) window.open('https://www.google.com/search?q=scam+report+' + encodeURIComponent(url), '_blank');
     }
 
-    // --- HUNTER LOG LOGIC ---
     const actions = ["BLOCKING", "INTERCEPTING", "TRACING", "PINGING", "FLUSHING"];
     const targets = ["IP", "PORT", "NODE", "PACKET", "DNS"];
     
@@ -163,11 +182,11 @@
         div.innerHTML = `> ${act} ${tgt}: ${num} [SECURE]`;
         
         logBox.prepend(div);
-        if(logBox.children.length > 8) logBox.lastChild.remove();
+        if(logBox.children.length > 7) logBox.lastChild.remove();
     }
 
     setInterval(() => {
-        document.getElementById('nodes').innerText = (1204812 + Math.floor(Math.random()*60)).toLocaleString();
+        document.getElementById('nodes').innerText = (1204812 + Math.floor(Math.random()*70)).toLocaleString();
     }, 2000);
 </script>
 </body>
