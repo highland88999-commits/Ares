@@ -12,13 +12,11 @@
             color: #ff0000;
             font-family: 'Courier New', Courier, monospace;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             position: relative;
-            /* Cyber glow effect */
-            box-shadow: inset 0 0 60px rgba(255,0,0,0.2);
         }
 
-        /* Full-screen background video */
+        /* Video Layer */
         #bg-video {
             position: fixed;
             inset: 0;
@@ -26,91 +24,91 @@
             height: 100%;
             object-fit: cover;
             z-index: -2;
-            opacity: 0.3; /* Dimmed for readability */
         }
 
-        /* Landing page */
+        /* Glass Holoframes Logic */
+        .holoframe {
+            background: rgba(255, 0, 0, 0.05);
+            backdrop-filter: blur(12px) saturate(150%);
+            -webkit-backdrop-filter: blur(12px) saturate(150%);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.1), inset 0 0 15px rgba(255, 0, 0, 0.05);
+            border-radius: 4px;
+            transition: all 0.4s ease;
+        }
+
+        /* Landing Page */
         #landing {
             position: fixed;
             inset: 0;
             z-index: 1000;
             background: #000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
-        #landing-video {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
-        }
-
         #enter-btn {
             z-index: 1010;
-            background: rgba(255, 0, 0, 0.2);
-            color: white;
+            background: rgba(255, 0, 0, 0.1);
+            color: #fff;
             font-size: 2.5em;
-            font-weight: bold;
-            padding: 20px 60px;
-            border: 3px solid #ff0000;
-            border-radius: 4px;
+            padding: 25px 60px;
+            border: 2px solid #ff0000;
             cursor: pointer;
-            box-shadow: 0 0 30px #ff0000;
-            transition: all 0.3s;
-            letter-spacing: 10px;
-            backdrop-filter: blur(5px);
+            letter-spacing: 12px;
+            text-shadow: 0 0 15px #ff0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
         }
 
-        #enter-btn:hover {
-            background: #ff0000;
-            box-shadow: 0 0 60px #ff0000;
-            transform: scale(1.05);
-        }
-
-        /* Loading screen */
+        /* Loading Overlay */
         #loading {
             position: fixed;
             inset: 0;
-            background: #000;
+            background: rgba(0,0,0,0.9);
             z-index: 999;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #ff0000;
         }
 
-        .progress-bar {
-            width: 50%;
-            height: 4px;
-            background: #200;
-            margin: 20px 0;
-            border-radius: 2px;
-        }
+        .progress-bar { width: 40%; height: 2px; background: #300; margin-top: 20px; }
+        .progress { width: 0; height: 100%; background: #ff0000; transition: width 3s linear; }
 
-        .progress {
-            width: 0;
-            height: 100%;
-            background: #ff0000;
-            box-shadow: 0 0 15px #ff0000;
-            transition: width 4s ease-in-out;
-        }
-
-        /* Main content layout */
+        /* Dashboard Layout */
         #main-content {
             display: none;
-            padding: 40px;
-            padding-bottom: 140px; /* Space for the bottom bar + 1mm gap */
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 30px;
+            /* Ensures 1mm gap above bottom bar (100px bar height + 4px gap) */
+            height: calc(100vh - 104px); 
+            overflow-y: auto;
+            position: relative;
         }
 
-        /* Bottom icon bar */
+        #hive-prompt {
+            padding: 20px;
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #threat-monitor {
+            padding: 30px;
+            min-height: 70vh;
+        }
+
+        #files-sidebar {
+            position: fixed;
+            right: 30px;
+            top: 100px;
+            width: 320px;
+            padding: 20px;
+            max-height: 60vh;
+        }
+
+        /* Navigation Dock */
         #bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -118,190 +116,126 @@
             transform: translateX(-50%);
             z-index: 2000;
             display: flex;
-            gap: 25px;
-            background: rgba(0,0,0,0.8);
-            padding: 12px 30px;
-            border-radius: 50px;
-            border: 1px solid #ff0000;
-            box-shadow: 0 0 30px rgba(255,0,0,0.4);
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.5);
             backdrop-filter: blur(10px);
         }
 
         .icon-btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(40,0,0,0.5);
-            border: 2px solid #ff0000;
+            width: 55px;
+            height: 55px;
+            border: 1px solid #ff0000;
             border-radius: 50%;
-            color: #ff0000;
-            font-size: 1.5em;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            color: #ff0000;
+            font-size: 1.4em;
             transition: 0.3s;
-            position: relative;
         }
 
-        .icon-btn:hover, .icon-btn.active {
-            background: #ff0000;
+        .icon-btn.active, .icon-btn:hover {
+            background: rgba(255, 0, 0, 0.8);
             color: #000;
             box-shadow: 0 0 20px #ff0000;
         }
 
-        .icon-label {
+        .hidden { opacity: 0; pointer-events: none; transform: translateY(20px); }
+
+        #music-container {
             position: absolute;
-            top: -30px;
-            font-size: 0.7em;
-            text-transform: uppercase;
-            opacity: 0;
-            transition: 0.3s;
-            pointer-events: none;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            left: -100px;
         }
-
-        .icon-btn:hover .icon-label { opacity: 1; }
-
-        /* Panels */
-        #hive-prompt {
-            background: rgba(0,0,0,0.8);
-            border: 2px solid #ff0000;
-            padding: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 2em;
-            letter-spacing: 5px;
-        }
-
-        #threat-monitor {
-            background: rgba(10,0,0,0.7);
-            border: 1px solid rgba(255,0,0,0.3);
-            padding: 20px;
-            min-height: 400px;
-        }
-
-        #files-sidebar {
-            position: fixed;
-            right: 40px;
-            top: 150px;
-            width: 300px;
-            background: rgba(0,0,0,0.9);
-            border: 1px solid #ff0000;
-            padding: 20px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .hidden { display: none !important; }
-
-        /* Demo mode text */
-        #demo-label {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
-            font-size: 10vw;
-            color: rgba(255,0,0,0.1);
-            pointer-events: none;
-            z-index: 0;
-            white-space: nowrap;
-        }
-
-        #music-frame { visibility: hidden; position: absolute; width: 1px; height: 1px; }
-
     </style>
 </head>
 <body>
 
-    <video id="bg-video" autoplay muted loop playsinline>
+    <video id="bg-video" muted loop playsinline>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
+    <div id="music-container"></div>
 
     <div id="landing">
-        <video id="landing-video" autoplay muted loop playsinline>
-            <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
-        </video>
-        <div id="enter-btn">ENTER THE HIVE</div>
+        <div id="enter-btn">ENTER ARES</div>
     </div>
 
     <div id="loading">
-        <div style="letter-spacing: 3px;">ESTABLISHING UPLINK...</div>
+        <div style="letter-spacing: 5px; font-size: 1.5em;">SYNCHRONIZING HIVE</div>
         <div class="progress-bar"><div class="progress" id="progress"></div></div>
     </div>
 
-    <iframe id="music-frame" src="" allow="autoplay"></iframe>
-
     <div id="main-content">
-        <div id="hive-prompt">ARES COMMAND INTERFACE</div>
+        <div id="hive-prompt" class="holoframe">GLOBAL COMMAND HUB</div>
         
-        <div id="threat-monitor">
-            <h2 style="margin-bottom: 20px; border-bottom: 1px solid #ff0000; padding-bottom: 10px;">ACTIVE THREAT FEED</h2>
-            <div style="color: #888;">[ SEARCHING FOR ANOMALIES... ]</div>
-            <div style="margin-top: 20px; padding: 15px; border: 1px dashed #ff0000;">
-                SYS_ALERT: Node 04 reporting high-velocity scraping attempt.
+        <div id="threat-monitor" class="holoframe">
+            <h2 style="border-bottom: 1px solid rgba(255,0,0,0.5); padding-bottom: 10px;">THREAT VECTORS</h2>
+            <div style="margin-top: 20px; font-family: monospace; color: rgba(255,255,255,0.7);">
+                [OK] Firewall Interfacing...<br>
+                [OK] Neural Network Active...<br>
+                [WAIT] Monitoring Encrypted Traffic...
             </div>
         </div>
 
-        <div id="files-sidebar" class="hidden">
-            <h3 style="color: #ff0000; margin-bottom: 15px;">REPOSITORY</h3>
-            <ul style="list-style: none; font-size: 0.9em; line-height: 2;">
-                <li>> phalanx.go</li>
-                <li>> sentinel.py</li>
-                <li>> config.yaml</li>
-                <li>> logs/active_breach.txt</li>
-            </ul>
+        <div id="files-sidebar" class="holoframe hidden">
+            <h3 style="margin-bottom: 15px;">REPOSITORY</h3>
+            <p>> ares_core.sh</p>
+            <p>> neuro_link.py</p>
+            <p>> phalanx_v2.go</p>
         </div>
     </div>
 
-    <div id="demo-label">DEMO MODE</div>
-
     <div id="bottom-bar">
-        <div class="icon-btn active" id="btn-home">
-            <span class="icon-label">Core</span> 🛡️
-        </div>
-        <div class="icon-btn" id="btn-threats">
-            <span class="icon-label">Threats</span> ⚠️
-        </div>
-        <div class="icon-btn" id="btn-files">
-            <span class="icon-label">Files</span> 📁
-        </div>
+        <div class="icon-btn active" id="nav-hive">🛡️</div>
+        <div class="icon-btn" id="nav-threats">⚠️</div>
+        <div class="icon-btn" id="nav-files">📁</div>
     </div>
 
     <script>
-        const landing = document.getElementById('landing');
-        const loading = document.getElementById('loading');
-        const mainContent = document.getElementById('main-content');
-        const musicFrame = document.getElementById('music-frame');
-        const progress = document.getElementById('progress');
+        const enterBtn = document.getElementById('enter-btn');
+        const bgVideo = document.getElementById('bg-video');
+        const musicContainer = document.getElementById('music-container');
+        
+        // ENTER EVENT LISTENER
+        enterBtn.addEventListener('click', () => {
+            // Start Video
+            bgVideo.play();
 
-        // Logic for Entry
-        document.getElementById('enter-btn').addEventListener('click', () => {
-            // Initiate Music - Stranger Things Playlist
-            musicFrame.src = "https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0";
-            
-            landing.style.display = 'none';
-            loading.style.display = 'flex';
-            
-            // Artificial load time
-            setTimeout(() => { progress.style.width = '100%'; }, 100);
+            // Start Unmuted Music
+            musicContainer.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" frameborder="0" allow="autoplay"></iframe>`;
+
+            // Transition
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('loading').style.display = 'flex';
             
             setTimeout(() => {
-                loading.style.display = 'none';
-                mainContent.style.display = 'block';
-            }, 4500);
+                document.getElementById('progress').style.width = '100%';
+            }, 100);
+
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }, 3200);
         });
 
-        // Navigation Toggle Logic
-        document.getElementById('btn-home').addEventListener('click', function() {
+        // UI Toggle Event Listeners
+        document.getElementById('nav-hive').addEventListener('click', function() {
             document.getElementById('hive-prompt').classList.toggle('hidden');
             this.classList.toggle('active');
         });
 
-        document.getElementById('btn-threats').addEventListener('click', function() {
+        document.getElementById('nav-threats').addEventListener('click', function() {
             document.getElementById('threat-monitor').classList.toggle('hidden');
             this.classList.toggle('active');
         });
 
-        document.getElementById('btn-files').addEventListener('click', function() {
+        document.getElementById('nav-files').addEventListener('click', function() {
             document.getElementById('files-sidebar').classList.toggle('hidden');
             this.classList.toggle('active');
         });
