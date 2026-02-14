@@ -3,74 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>ARES | Global Terminal</title>
+    <title>ARES | Terminal</title>
     <style>
         :root { --ares-red: #ff0000; --glass: rgba(0, 0, 0, 0.85); }
         * { margin:0; padding:0; box-sizing:border-box; }
         body, html { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Courier New', monospace; color: white; }
 
-        /* --- STAGE 1: GATE --- */
+        /* GATE */
         #entry-gate {
             position: fixed; inset: 0; z-index: 9999; background: #000;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .gate-btn {
             padding: 25px 50px; border: 2px solid var(--ares-red);
-            color: var(--ares-red); letter-spacing: 15px; font-weight: bold;
-            text-shadow: 0 0 20px var(--ares-red); animation: breathe 3s infinite;
+            color: var(--ares-red); letter-spacing: 12px; font-weight: bold;
+            text-shadow: 0 0 20px var(--ares-red); animation: pulse 2s infinite;
         }
 
-        /* --- STAGE 2: TERMINAL --- */
+        /* MAIN TERMINAL */
         #main-terminal { position: fixed; inset: 0; z-index: 100; display: none; }
         
-        /* Video: Strictly Muted Background */
         #bg-video {
             position: absolute; inset: 0; width: 100%; height: 100%; 
-            object-fit: cover; z-index: 5; filter: brightness(0.4); pointer-events: none;
+            object-fit: cover; z-index: 5; filter: brightness(0.3);
         }
 
-        /* Audio Engine: 1px Ghost Iframe (Bypasses Mobile Silence) */
-        #audio-engine {
-            position: absolute; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.01; z-index: 1;
-        }
-
-        #hive-pop {
-            position: fixed; top: 20px; right: 20px; z-index: 2000;
-            text-align: right; color: var(--ares-red); font-weight: bold;
-            background: var(--glass); padding: 10px 20px; border-right: 4px solid var(--ares-red);
-        }
-
-        #hunter-log {
-            position: fixed; bottom: 105px; left: 20px; width: 300px; height: 140px;
-            z-index: 2000; overflow: hidden; font-size: 0.7rem; color: rgba(255, 0, 0, 0.6);
-            pointer-events: none; display: flex; flex-direction: column-reverse;
-        }
+        /* Audio Engine - Hidden but active */
+        #audio-engine { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
         #terminal-shell {
             position: relative; z-index: 100; padding: 20px;
-            height: calc(100vh - 100px); overflow-y: auto; display: flex; justify-content: center;
+            height: calc(100vh - 100px); overflow-y: auto; display: flex; flex-direction: column; align-items: center;
         }
 
         .holo-window {
-            background: var(--glass); border: 1px solid rgba(255, 0, 0, 0.3);
-            width: 100%; max-width: 600px; padding: 35px; margin-top: 40px;
-            backdrop-filter: blur(20px); box-shadow: 0 0 50px #000;
+            background: var(--glass); border: 1px solid rgba(255,0,0,0.3);
+            width: 100%; max-width: 600px; padding: 30px; margin-top: 40px;
+            backdrop-filter: blur(15px); border-radius: 4px;
         }
 
+        /* HUD & UNMUTE OVERRIDE */
         #hud-dock {
-            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 20px; z-index: 1000;
-            background: rgba(0,0,0,0.9); padding: 15px 40px; border-radius: 50px;
-            border: 1px solid var(--ares-red);
+            background: rgba(0,0,0,0.9); padding: 12px 30px; border-radius: 50px;
+            border: 1px solid var(--ares-red); align-items: center;
         }
+
         .icon {
-            width: 50px; height: 50px; border: 1px solid var(--ares-red);
+            width: 45px; height: 45px; border: 1px solid var(--ares-red);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: var(--ares-red); transition: 0.3s;
         }
-        .icon.active { background: var(--ares-red); color: #000; box-shadow: 0 0 20px var(--ares-red); }
+        .icon.active { background: var(--ares-red); color: #000; box-shadow: 0 0 15px var(--ares-red); }
 
-        @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        #sync-trigger {
+            color: var(--ares-red); font-size: 0.7rem; font-weight: bold;
+            letter-spacing: 2px; cursor: pointer; display: none;
+            padding: 5px 15px; border: 1px solid var(--ares-red); border-radius: 4px;
+            animation: flash 1s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes flash { 0%, 100% { background: transparent; } 50% { background: rgba(255,0,0,0.2); } }
     </style>
 </head>
 <body>
@@ -86,86 +81,56 @@
 
     <div id="audio-engine"></div>
 
-    <div id="hive-pop">
-        <div style="font-size: 0.6rem; opacity: 0.7;">HIVE NODES</div>
-        <span id="nodes">1,204,812</span>
-    </div>
-
-    <div id="hunter-log"></div>
-
     <div id="terminal-shell">
         <div id="win-brief" class="holo-window">
-            <h2 style="color:var(--ares-red); letter-spacing: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px;">MISSION BRIEF</h2>
-            <p style="line-height: 1.6; opacity: 0.9;">"Global security isn't a state of being—it's an active hunt. ARES intercepts threats at the edge of the network."</p>
-        </div>
-
-        <div id="win-scan" class="holo-window" style="display:none;">
-            <h2 style="color:var(--ares-red); letter-spacing: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--ares-red); padding-bottom: 10px;">THREAT SCANNER</h2>
-            <input type="text" id="scan-in" placeholder="URL SIGNATURE..." style="width:100%; padding:15px; background:rgba(0,0,0,0.5); border:1px solid var(--ares-red); color:#fff; outline:none; margin-bottom:15px;">
-            <button onclick="runScan()" style="width:100%; padding:15px; background:var(--ares-red); color:#000; border:none; font-weight:bold; cursor:pointer;">SCAN PACKETS</button>
+            <h2 style="color:var(--ares-red); margin-bottom: 15px;">SYSTEM ACTIVE</h2>
+            <p>Background Video: [MUTED]<br>Audio Stream: [ATTEMPTING SYNC...]</p>
         </div>
     </div>
 
     <div id="hud-dock">
-        <div class="icon active" id="ic-brief" onclick="showTab('brief')">🛡️</div>
-        <div class="icon" id="ic-scan" onclick="showTab('scan')">⚠️</div>
+        <div class="icon active">🛡️</div>
+        <div id="sync-trigger" onclick="forceAudio()">SYNC COMMS</div>
     </div>
 </div>
 
 <script>
     function igniteAres() {
-        // 1. UI Switch
         document.getElementById('entry-gate').style.display = 'none';
         document.getElementById('main-terminal').style.display = 'block';
 
-        // 2. Play Muted Video
-        const bgVid = document.getElementById('bg-video');
-        bgVid.play().catch(e => console.log("Video Playback Pending..."));
+        // 1. Start background video (Muted)
+        document.getElementById('bg-video').play();
 
-        // 3. FORCE AUDIO INJECTION
-        // Using the 'videoseries' parameter and ensuring 'allow=autoplay'
-        // Index=0 forces the first video to start immediately
-        const audioBox = document.getElementById('audio-engine');
-        audioBox.innerHTML = `
-            <iframe 
-                width="100" height="100" 
-                src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0&index=0&enablejsapi=1" 
-                frameborder="0" 
-                allow="autoplay; encrypted-media" 
-                style="border:none;">
-            </iframe>
-        `;
+        // 2. Inject Unmuted Playlist
+        const engine = document.getElementById('audio-engine');
+        engine.innerHTML = `
+            <iframe id="ares-radio" width="100" height="100" 
+            src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
+            allow="autoplay"></iframe>`;
 
-        // 4. Start Terminal Effects
-        setInterval(logTick, 800);
+        // 3. System check: If no sound is detected by user, show the override
+        setTimeout(() => {
+            document.getElementById('sync-trigger').style.display = 'block';
+        }, 2000);
     }
 
-    function showTab(t) {
-        document.getElementById('win-brief').style.display = 'none';
-        document.getElementById('win-scan').style.display = 'none';
-        document.getElementById('ic-brief').classList.remove('active');
-        document.getElementById('ic-scan').classList.remove('active');
-        document.getElementById('win-' + t).style.display = 'block';
-        document.getElementById('ic-' + t).classList.add('active');
+    // This function is the "Safety Net" - It uses a fresh user click to re-fire unmuted
+    function forceAudio() {
+        const engine = document.getElementById('audio-engine');
+        engine.innerHTML = ''; // Clear
+        setTimeout(() => {
+            engine.innerHTML = `
+                <iframe width="100" height="100" 
+                src="https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0" 
+                allow="autoplay"></iframe>`;
+        }, 100);
+        
+        document.getElementById('sync-trigger').innerHTML = "COMMS ONLINE";
+        document.getElementById('sync-trigger').style.animation = "none";
+        document.getElementById('sync-trigger').style.color = "#00ff00";
+        document.getElementById('sync-trigger').style.borderColor = "#00ff00";
     }
-
-    function runScan() {
-        const val = document.getElementById('scan-in').value;
-        if(val) window.open('https://www.google.com/search?q=scam+report+' + encodeURIComponent(val), '_blank');
-    }
-
-    function logTick() {
-        const log = document.getElementById('hunter-log');
-        const entry = document.createElement('div');
-        entry.style.marginBottom = "4px";
-        entry.innerHTML = `> TRACING NODE ${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)} [LOCKED]`;
-        log.prepend(entry);
-        if(log.children.length > 8) log.lastChild.remove();
-    }
-
-    setInterval(() => {
-        document.getElementById('nodes').innerText = (1204812 + Math.floor(Math.random()*50)).toLocaleString();
-    }, 2000);
 </script>
 </body>
 </html>
