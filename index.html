@@ -6,6 +6,7 @@
     <title>ARES | Global Command</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             background: #000;
             color: #ff0000;
@@ -13,19 +14,11 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            box-shadow: 
-                0 0 20px 5px rgba(255,0,0,0.4),
-                0 0 40px 15px rgba(255,0,0,0.3),
-                inset 0 0 60px 10px rgba(255,0,0,0.15);
-            animation: neonPulse 8s infinite alternate ease-in-out;
+            /* Cyber glow effect */
+            box-shadow: inset 0 0 60px rgba(255,0,0,0.2);
         }
 
-        @keyframes neonPulse {
-            0% { box-shadow: 0 0 20px 5px rgba(255,0,0,0.4), 0 0 40px 15px rgba(255,0,0,0.3), inset 0 0 60px 10px rgba(255,0,0,0.15); }
-            100% { box-shadow: 0 0 30px 10px rgba(255,0,0,0.6), 0 0 60px 25px rgba(255,0,0,0.45), inset 0 0 90px 20px rgba(255,0,0,0.25); }
-        }
-
-        /* Full-screen background video (main experience) */
+        /* Full-screen background video */
         #bg-video {
             position: fixed;
             inset: 0;
@@ -33,7 +26,7 @@
             height: 100%;
             object-fit: cover;
             z-index: -2;
-            opacity: 0.20; /* subtle cyber layer */
+            opacity: 0.3; /* Dimmed for readability */
         }
 
         /* Landing page */
@@ -48,76 +41,72 @@
             align-items: center;
         }
 
-        #landing video {
+        #landing-video {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.75;
+            opacity: 0.8;
         }
 
         #enter-btn {
-            z-index: 10;
-            background: rgba(255,0,0,0.65);
+            z-index: 1010;
+            background: rgba(255, 0, 0, 0.2);
             color: white;
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: bold;
-            padding: 25px 80px;
-            border: 4px solid #ff0000;
-            border-radius: 16px;
+            padding: 20px 60px;
+            border: 3px solid #ff0000;
+            border-radius: 4px;
             cursor: pointer;
-            box-shadow: 0 0 50px #ff0000;
-            transition: all 0.4s;
-            letter-spacing: 8px;
-            text-shadow: 0 0 15px #000;
+            box-shadow: 0 0 30px #ff0000;
+            transition: all 0.3s;
+            letter-spacing: 10px;
+            backdrop-filter: blur(5px);
         }
 
         #enter-btn:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 100px #ff0000;
+            background: #ff0000;
+            box-shadow: 0 0 60px #ff0000;
+            transform: scale(1.05);
         }
 
         /* Loading screen */
         #loading {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.92);
+            background: #000;
             z-index: 999;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #ff0000;
-            font-size: 2.2em;
-            text-shadow: 0 0 25px #ff0000;
         }
 
         .progress-bar {
-            width: 70%;
-            height: 14px;
-            background: #300;
-            border: 2px solid #ff0000;
-            border-radius: 8px;
-            margin: 40px 0;
-            overflow: hidden;
+            width: 50%;
+            height: 4px;
+            background: #200;
+            margin: 20px 0;
+            border-radius: 2px;
         }
 
         .progress {
             width: 0;
             height: 100%;
             background: #ff0000;
-            box-shadow: 0 0 35px #ff0000;
-            transition: width 4.5s ease-in-out;
+            box-shadow: 0 0 15px #ff0000;
+            transition: width 4s ease-in-out;
         }
 
-        /* Main content */
+        /* Main content layout */
         #main-content {
             display: none;
-            position: relative;
-            z-index: 1;
-            padding: 30px;
-            max-width: 1600px;
+            padding: 40px;
+            padding-bottom: 140px; /* Space for the bottom bar + 1mm gap */
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -127,340 +116,194 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 100;
+            z-index: 2000;
             display: flex;
-            gap: 30px;
-            background: rgba(0,0,0,0.6);
-            padding: 15px 40px;
-            border-radius: 20px;
-            border: 2px solid rgba(255,0,0,0.5);
-            box-shadow: 0 0 40px rgba(255,0,0,0.6);
-            backdrop-filter: blur(8px);
+            gap: 25px;
+            background: rgba(0,0,0,0.8);
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: 1px solid #ff0000;
+            box-shadow: 0 0 30px rgba(255,0,0,0.4);
+            backdrop-filter: blur(10px);
         }
 
         .icon-btn {
-            width: 80px;
-            height: 80px;
-            background: rgba(255,0,0,0.25);
-            border: 3px solid #ff0000;
+            width: 60px;
+            height: 60px;
+            background: rgba(40,0,0,0.5);
+            border: 2px solid #ff0000;
             border-radius: 50%;
             color: #ff0000;
-            font-size: 2.2em;
+            font-size: 1.5em;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(255,0,0,0.5);
-            text-shadow: 0 0 10px #ff0000;
+            transition: 0.3s;
+            position: relative;
         }
 
         .icon-btn:hover, .icon-btn.active {
-            background: rgba(255,0,0,0.6);
-            transform: scale(1.15);
-            box-shadow: 0 0 50px #ff0000;
+            background: #ff0000;
+            color: #000;
+            box-shadow: 0 0 20px #ff0000;
         }
 
         .icon-label {
             position: absolute;
-            bottom: -35px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.9em;
-            white-space: nowrap;
-            color: #ff8888;
+            top: -30px;
+            font-size: 0.7em;
+            text-transform: uppercase;
             opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .icon-btn:hover .icon-label,
-        .icon-btn.active .icon-label {
-            opacity: 1;
-        }
-
-        /* Panels (now toggleable) */
-        #hive-prompt, #files-sidebar, #threat-monitor {
-            transition: all 0.4s ease;
-        }
-
-        #hive-prompt.hidden,
-        #files-sidebar.hidden,
-        #threat-monitor.hidden {
-            opacity: 0;
-            transform: translateY(40px);
+            transition: 0.3s;
             pointer-events: none;
         }
 
+        .icon-btn:hover .icon-label { opacity: 1; }
+
+        /* Panels */
         #hive-prompt {
-            position: sticky;
-            top: 30px;
-            z-index: 50;
-            background: rgba(0,0,0,0.78);
-            border: 3px solid #ff0000;
-            border-radius: 14px;
-            padding: 25px;
-            margin: 0 auto 40px;
-            max-width: 1000px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ff0000;
+            padding: 20px;
+            margin-bottom: 30px;
             text-align: center;
-            font-size: 2.4em;
-            font-weight: bold;
+            font-size: 2em;
             letter-spacing: 5px;
-            text-shadow: 0 0 20px #ff0000;
-            box-shadow: 0 0 40px rgba(255,0,0,0.7), inset 0 0 25px rgba(255,0,0,0.5);
-            backdrop-filter: blur(8px);
         }
 
         #threat-monitor {
-            background: rgba(10,10,10,0.68);
-            border: 1px solid rgba(255,0,0,0.45);
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 0 25px rgba(255,0,0,0.4);
-            backdrop-filter: blur(5px);
+            background: rgba(10,0,0,0.7);
+            border: 1px solid rgba(255,0,0,0.3);
+            padding: 20px;
+            min-height: 400px;
         }
 
         #files-sidebar {
             position: fixed;
-            right: 30px;
-            top: 120px;
-            width: 400px;
-            background: rgba(0,0,0,0.82);
-            border: 2px solid #ff0000;
-            border-radius: 12px;
-            padding: 25px;
-            color: #ff5555;
-            box-shadow: 0 0 40px rgba(255,0,0,0.6);
-            max-height: 75vh;
+            right: 40px;
+            top: 150px;
+            width: 300px;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid #ff0000;
+            padding: 20px;
+            max-height: 60vh;
             overflow-y: auto;
-            backdrop-filter: blur(6px);
         }
 
-        /* Keep other styles (folders, btn-report, digital rain, etc.) */
-        h1 { text-align: center; font-size: 2.8em; text-shadow: 0 0 18px #ff0000; margin-bottom: 25px; }
-        hr { border: none; height: 3px; background: linear-gradient(to right, transparent, #ff0000, transparent); box-shadow: 0 0 25px #ff0000; margin: 35px 0; }
+        .hidden { display: none !important; }
 
-        .folder-container {
-            background: rgba(10,10,10,0.65);
-            border: 1px solid rgba(255,0,0,0.4);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 15px rgba(255,0,0,0.3);
-            backdrop-filter: blur(4px);
-        }
-
-        /* DEMO overlay */
-        #demo-overlay {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0.35;
-            animation: flash 7s infinite alternate ease-in-out;
-        }
-
-        @keyframes flash { 0%,100% {opacity:0.22;} 50% {opacity:0.48;} }
-
+        /* Demo mode text */
         #demo-label {
-            font-size: 9em;
-            font-weight: bold;
-            color: #ff0000;
-            text-shadow: 0 0 40px #ff0000, 0 0 80px #ff0000;
-            letter-spacing: 12px;
-            transform: rotate(-12deg);
-            user-select: none;
-        }
-
-        #digital-rain {
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            opacity: 0.4;
-        }
-
-        #music-frame {
-            position: absolute;
-            width: 1px; height: 1px;
-            opacity: 0;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 10vw;
+            color: rgba(255,0,0,0.1);
             pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
         }
+
+        #music-frame { visibility: hidden; position: absolute; width: 1px; height: 1px; }
+
     </style>
 </head>
 <body>
 
-    <!-- Main background video (farthest layer) -->
     <video id="bg-video" autoplay muted loop playsinline>
         <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
     </video>
 
-    <!-- Landing page -->
     <div id="landing">
-        <video autoplay muted loop playsinline>
+        <video id="landing-video" autoplay muted loop playsinline>
             <source src="https://files.catbox.moe/etfb2y.mp4" type="video/mp4">
         </video>
         <div id="enter-btn">ENTER THE HIVE</div>
     </div>
 
-    <!-- Loading screen -->
     <div id="loading">
-        <div>SYNCING GLOBAL HIVE...</div>
+        <div style="letter-spacing: 3px;">ESTABLISHING UPLINK...</div>
         <div class="progress-bar"><div class="progress" id="progress"></div></div>
-        <div id="complete-text" style="opacity:0; font-size:1.4em;">SYNC COMPLETE — INITIALIZING DEFENSE GRID</div>
     </div>
 
-    <!-- Invisible music (Stranger Things soundtrack — unmuted) -->
-    <iframe id="music-frame" src="" allow="autoplay" frameborder="0"></iframe>
+    <iframe id="music-frame" src="" allow="autoplay"></iframe>
 
-    <!-- Main Dashboard -->
     <div id="main-content">
-        <!-- Bottom icon bar for holoframes -->
-        <div id="bottom-bar">
-            <div class="icon-btn active" id="toggle-hive" title="Global Hive Status">🛡️<span class="icon-label">Hive Core</span></div>
-            <div class="icon-btn" id="toggle-threats" title="Active Threats Monitor">⚠️<span class="icon-label">Threats</span></div>
-            <div class="icon-btn" id="toggle-files" title="Files Manifest">📁<span class="icon-label">Repo Files</span></div>
-        </div>
-
-        <!-- Hive Prompt panel -->
-        <div id="hive-prompt">GLOBAL SECURITY HIVE</div>
-
-        <h1>ARES DEFENSE SYSTEM: ACTIVE THREATS</h1>
-        <hr>
-
-        <!-- Threat Monitor panel -->
+        <div id="hive-prompt">ARES COMMAND INTERFACE</div>
+        
         <div id="threat-monitor">
-            <!-- Request Repo Button -->
-            <div style="text-align:center; margin:25px 0 40px;">
-                <a href="mailto:projectaresai@gmail.com?subject=Request%20Repo%20Clone&body=Hello%20Ares%20Team..." class="request-repo-btn">REQUEST REPO CLONE</a>
+            <h2 style="margin-bottom: 20px; border-bottom: 1px solid #ff0000; padding-bottom: 10px;">ACTIVE THREAT FEED</h2>
+            <div style="color: #888;">[ SEARCHING FOR ANOMALIES... ]</div>
+            <div style="margin-top: 20px; padding: 15px; border: 1px dashed #ff0000;">
+                SYS_ALERT: Node 04 reporting high-velocity scraping attempt.
             </div>
-
-            <!-- Threat Folders -->
-            {% for offender in offenders %}
-            <div class="folder-container">
-                <div class="folder-header" onclick="toggleFolder('{{ offender.ip }}')">
-                    <div>
-                        <span class="ip-text">📂 {{ offender.ip }}</span>
-                        <span style="margin-left:25px; color:#888;">Detected: {{ offender.timestamp }}</span>
-                    </div>
-                    <span class="crime-tag">{{ offender.category }}</span>
-                </div>
-                <div id="{{ offender.ip }}" class="folder-content">
-                    <!-- folder details -->
-                </div>
-            </div>
-            {% endfor %}
         </div>
 
-        <!-- Files Sidebar -->
         <div id="files-sidebar" class="hidden">
-            <h3>Hive Files Manifest</h3>
-            <ul id="files-list">
-                <li>ares_config.yaml</li>
-                <li>authority_contacts.txt</li>
-                <li>diplomat.py</li>
-                <li>index.py</li>
-                <li>phalanx.go</li>
-                <li>sentinel.py</li>
-                <li>tarpit.sh</li>
-                <li>nexus.sh</li>
-                <li>/agents/ (AI minions)</li>
-                <li>/phalanx/ (kernel blocks)</li>
-                <li>/dreadnought/ (traps)</li>
-                <li>/evidence/ (forensics lockers)</li>
-                <li>/sentinel/ (honey-tokens)</li>
+            <h3 style="color: #ff0000; margin-bottom: 15px;">REPOSITORY</h3>
+            <ul style="list-style: none; font-size: 0.9em; line-height: 2;">
+                <li>> phalanx.go</li>
+                <li>> sentinel.py</li>
+                <li>> config.yaml</li>
+                <li>> logs/active_breach.txt</li>
             </ul>
         </div>
     </div>
 
-    <!-- DEMO overlay -->
-    <div id="demo-overlay">
-        <canvas id="digital-rain"></canvas>
-        <div id="demo-label">DEMO MODE</div>
+    <div id="demo-label">DEMO MODE</div>
+
+    <div id="bottom-bar">
+        <div class="icon-btn active" id="btn-home">
+            <span class="icon-label">Core</span> 🛡️
+        </div>
+        <div class="icon-btn" id="btn-threats">
+            <span class="icon-label">Threats</span> ⚠️
+        </div>
+        <div class="icon-btn" id="btn-files">
+            <span class="icon-label">Files</span> 📁
+        </div>
     </div>
 
     <script>
-        // Elements
         const landing = document.getElementById('landing');
         const loading = document.getElementById('loading');
         const mainContent = document.getElementById('main-content');
         const musicFrame = document.getElementById('music-frame');
         const progress = document.getElementById('progress');
-        const completeText = document.getElementById('complete-text');
 
-        const hivePrompt = document.getElementById('hive-prompt');
-        const threatMonitor = document.getElementById('threat-monitor');
-        const filesSidebar = document.getElementById('files-sidebar');
-
-        // Enter hive
+        // Logic for Entry
         document.getElementById('enter-btn').addEventListener('click', () => {
-            // Start music (unmuted Stranger Things playlist)
-            musicFrame.src = "https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0&controls=0&rel=0&enablejsapi=1";
-
+            // Initiate Music - Stranger Things Playlist
+            musicFrame.src = "https://www.youtube.com/embed/videoseries?list=PLCrg_O54Bc6kfFqK1kL25uXSGnoQk6cuV&autoplay=1&mute=0";
+            
             landing.style.display = 'none';
             loading.style.display = 'flex';
-
-            setTimeout(() => { progress.style.width = '100%'; }, 600);
-            setTimeout(() => {
-                completeText.style.opacity = '1';
-                completeText.style.textShadow = '0 0 40px #ff0000';
-            }, 4200);
+            
+            // Artificial load time
+            setTimeout(() => { progress.style.width = '100%'; }, 100);
+            
             setTimeout(() => {
                 loading.style.display = 'none';
                 mainContent.style.display = 'block';
-            }, 5500);
+            }, 4500);
         });
 
-        // Toggle panels via bottom icons
-        document.getElementById('toggle-hive').addEventListener('click', () => {
-            hivePrompt.classList.toggle('hidden');
-            document.getElementById('toggle-hive').classList.toggle('active');
+        // Navigation Toggle Logic
+        document.getElementById('btn-home').addEventListener('click', function() {
+            document.getElementById('hive-prompt').classList.toggle('hidden');
+            this.classList.toggle('active');
         });
 
-        document.getElementById('toggle-threats').addEventListener('click', () => {
-            threatMonitor.classList.toggle('hidden');
-            document.getElementById('toggle-threats').classList.toggle('active');
+        document.getElementById('btn-threats').addEventListener('click', function() {
+            document.getElementById('threat-monitor').classList.toggle('hidden');
+            this.classList.toggle('active');
         });
 
-        document.getElementById('toggle-files').addEventListener('click', () => {
-            filesSidebar.classList.toggle('hidden');
-            document.getElementById('toggle-files').classList.toggle('active');
-        });
-
-        // Folder toggle function
-        function toggleFolder(id) {
-            const el = document.getElementById(id);
-            el.style.display = (el.style.display === "block") ? "none" : "block";
-        }
-
-        // Digital rain
-        const canvas = document.getElementById('digital-rain');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const binary = '01';
-        const fontSize = 14;
-        const columns = canvas.width / fontSize;
-        const drops = Array(Math.floor(columns)).fill(1);
-
-        function drawRain() {
-            ctx.fillStyle = 'rgba(0,0,0,0.06)';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = '#440000';
-            ctx.font = fontSize + 'px monospace';
-            for (let i = 0; i < drops.length; i++) {
-                const text = binary.charAt(Math.floor(Math.random() * binary.length));
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            }
-        }
-        setInterval(drawRain, 130);
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        document.getElementById('btn-files').addEventListener('click', function() {
+            document.getElementById('files-sidebar').classList.toggle('hidden');
+            this.classList.toggle('active');
         });
     </script>
 </body>
